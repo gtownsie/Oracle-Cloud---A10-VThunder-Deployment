@@ -1,7 +1,7 @@
 # DEPLOYMENT SCENARIO
 As a deployment example, this document uses the first deployment option described in the previous section where a web application service is deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure.
 
-![Deployment Scenario](/.images/Deployment_Senario.png)
+![Deployment Scenario](./images/Deployment_Senario.png)
 _Figure 7:_ Example deployment topology and network information
 
 #DEPLOYMENT PREREQUISITES
