@@ -126,11 +126,11 @@ During the vThunder deployment an SSH Key pair is required to allow SSH access t
 1. Click the `Save public key` and save the file as `ssh_key.pub`
 1. Click the `Save Private Key` and save the priate key as `ssh_key_priv.ppk` NOTE:  the .ppk file is used by Putty
 1. Under the Key section, select the text in the box labeled `Public key for pasting into OpenSSH authorized_keys file`
-  1. Right-Click the window and `select-all`
-  1. Paste the text into a notepad document and save it in the same folder as the other keys.  
-  1. Save the file as `authorized_keys.pub`  
-     ![PuTTY OpenSSH authorized_keys](./images/putty_authorized_keys.png)
-  1. Select the `Conversions` dropdown and select `export OpenSSH key` and save the file as `ssh_key` with no extension.
+   1. Right-Click the window and `select-all`
+   1. Paste the text into a notepad document and save it in the same folder as the other keys.  
+   1. Save the file as `authorized_keys.pub`  
+   ![PuTTY OpenSSH authorized_keys](./images/putty_authorized_keys.png)
+1. Select the `Conversions` dropdown and select `export OpenSSH key` and save the file as `ssh_key` with no extension.
 
 # Configure Oracle Cloud
 ## Create Virtual Cloud Network (VCN)
