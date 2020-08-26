@@ -154,24 +154,32 @@ Subnet|Management|10.0.0.0/24|Public/Regional
 ### Create VCN
 1. Login to the Oracle Cloud web interfaces
 1. Select the "hamburger" menu dropdown in the upper left corner, Select `Networking/Virtual Cloud Networks`
-1. Click on the `Create VCN` and fill out the form with the following parameters:
+1. Click on the `Start VCN Wizard` and
+![Create VCN](./images/vcn_wizard_start.png)
+1. Fill out the form with the following parameters:
    1. Name:  `VCN_a10demo`
-   1. CIDR BLOCK: `10.0.0.0/20`![Create VCN](./images/create_vcn.png)
-1. Select `Create VCN`
+   1. VCN CIDR BLOCK: `10.0.0.0/20`
+   1. Public Subnet CIDR Block:  `10.0.0.0/24` *NOTE: This will become the Management Network*
+   1. Private Subnet CIDR Block:  `10.0.2.0/24` *NOTE: This will become the Server Network*
+   ![Create VCN](./images/vcn_wizard_configuration.png)
+1. Select `Next`
+1. Select `Create`
 
-### Create subnets
+### Modify Management and Server subnets
 1. Go into the `VCN_a10dmo` configuration page
-1. Select `Create Subnet`
-![Create VCN Subnet](./images/vcn_create_subnet.png)
-1. Create the Management Network using the following configuration:
-   1. Name:  `Management_Network`
-   1. Subnet Type:  `Regional`
-   1. CIDR BLOCK: `10.0.0.0/24`
-   1. Route Table: `Default Route Table for VCN_a10demo`
-   1. Subnet Access:  `Public Subnet`
-   1. DHCP Options: `Default DHCP Options for VCN_a10demo`
-   1. Security List: `Default Security List for VCN_a10demo`
-1. Choose `Create Subnet`
+1. Select `Public Subnet-VCN_a10demo`
+1. Select `Edit`
+1. Change Name to `Management_Network` and `Save Changes`
+   ![Create VCN](./images/vcn_modify_management.png)
+1. Select `Pr Subnet-VCN_a10demo`
+1. Select `Edit`
+1. Change Name to `Management_Network` and `Save Changes`
+   ![Create VCN](./images/vcn_modify_server.png)
+
+## Create Public NETWORK
+1. Create Route Table by going into Route tables under resources and choosing `Create Route Table`
+![Create VCN](./images/public_network_route_table.png)
+1. Go the the 'Subnets' screen and select `Create Subnet`
 1. Create the Public Network using the following configuration:
    1. Name:  `Public_Network`
    1. Subnet Type:  `Regional`
@@ -180,17 +188,8 @@ Subnet|Management|10.0.0.0/24|Public/Regional
    1. Subnet Access:  `Public Subnet`
    1. DHCP Options: `Default DHCP Options for VCN_a10demo`
    1. Security List: `Default Security List for VCN_a10demo`
-1. Choose `Create Subnet`
-1. Create the Server Network using the following configuration:
-   1. Name:  `Server_Network`
-   1. Subnet Type:  `Regional`
-   1. CIDR BLOCK: `10.0.2.0/24`
-   1. Route Table: `Default Route Table for VCN_a10demo`
-   1. Subnet Access:  `Private Subnet` **<-- Note: the Server network will use the Private Subnet**
-   1. DHCP Options: `Default DHCP Options for VCN_a10demo`
-   1. Security List: `Default Security List for VCN_a10demo`
-1. Choose `Create Subnet`
-
+   1. Choose `Create Subnet`
+![Create VCN](./images/create_public_network.png)
 Once completed the Subnets for the VCN will reflect the following:
 ![VCN Configuration ](./images/vcn_configuration.png)
 
@@ -226,7 +225,91 @@ Subnet|Management_Network|Management_Network|For mgmt. interface
 Public IP assignment|Yes|Yes
 
 ## Create Primary ADC instance
+Next a the Secondary ADC instance is created using the following settings.
+Name|IP Address|Floating IP
+---------|---------|---------
+Instance Name|vThunderADC-1|
+Management Network|DHCP|
+Public Network|10.0.1.11|10.0.1.10
+Server Network|10.0.2.11|10.0.2.10
+
 1. From the OCI screen, select the dropdown menu in the upper left corner
 1. Select `Compute/Instances`
-1. Click on `Create Instance`
-1. 
+1. Click on `Create Instance` enter the name from Table 2, `vThunderADC-1`
+1.Select `Change Image`
+![Create Compute Instance](./images/cci.png)
+1. Change to `Partner Images` tab and check `A10 vThunder Application Delivery Controller - BYOL`
+![Select Image](./images/cci-image.png)
+1. Since this is the `vThunderADC-1` select `AD 1` for the Availability Domain
+1. Choose `Change Shape`   
+![Select Shape](./images/cci-ad-shape.png)
+1. For `Instance Type` select `Virtual Machine`, `Shape Series` choose `Intel Skylake`, check the box next to `VM Standard 2.4`      
+![Select Instance Flavor](./images/cci-shape.png)
+1. Continue to scroll down the CCI screen to the `Configure Networking` and change `Subnet` to  `Management_Network (Regional)` and validate that `ASSIGN A PUBLIC IP ADDRESS` is selected               
+![Configure Networking](./images/CCI-networking.png)
+1. After the Network configuration, scroll do the `Add SSH Keys` section.  Select `Choose SSH key FILES` and select the file `Public_Key_authorized_keys.txt` file created in the SSH Key section
+![Configure Networking](./images/cci-ssh.png)
+1.  Choose `Create` to create the instance.
+
+### ATTACH VNICs to the ADC
+By default OCI will only deploy the instance with the Subnet defined in the Create Compute Instance Network Configuration.  The following steps will add the Public and Server networks to the Instance.
+
+1. Select `vThunderADC-1` under the instances List
+1. Scroll to the bottom of the page and select `Attached VNICs`
+![Instance Config VNICs](./images/instance-config-vnics.png)
+1. Choose `Create VNIC`
+![Create VNICs](./images/vnic-create-1.png)
+1. For name enter `Public_VNIC`,Select a Subnet choose `Public_Network`, Private IP address enter `10.0.1.11` and check 'ASSIGN A PUBLIC IP'
+![Create Public VNICs](./images/vnic-public-1.png)
+1. Save Changes
+1. Select `Create VNIC`
+1. For name enter `Server_VNIC`,Select a Subnet choose `Server_Network`, Private IP address enter `10.0.2.11` and check 'ASSIGN A PUBLIC IP'
+![Create Server VNICs](./images/vnic-server-1.png)
+1. At the top of the instance Details screen, select `Reboot` to restart the instance.  Once the instance restarts the remaining network interfaces are available to ACOS.
+
+## Create Secondary ADC instance
+Next a the Secondary ADC instance is created using the following settings.
+
+Name|IP Address|Floating IP
+---------|---------|---------
+Instance Name|vThunderADC-2|
+Management Network|DHCP|
+Public Network|10.0.1.12|10.0.1.10
+Server Network|10.0.2.12|10.0.2.10
+
+1. From the OCI screen, select the dropdown menu in the upper left corner
+1. Select `Compute/Instances`
+1. Click on `Create Instance` enter the name from Table 2, `vThunderADC-2`
+1.Select `Change Image`          
+![Create Compute Instance](./images/cci-2.png)
+1. Change to `Partner Images` tab and check `A10 vThunder Application Delivery Controller - BYOL`
+![Select Image](./images/cci-image.png)
+1. Since this is the `vThunderADC-2` select `AD 2` for the Availability Domain
+1. Choose `Change Shape`                                    
+![Select Shape](./images/cci-ad-shape-2.png)
+1. For `Instance Type` select `Virtual Machine`, `Shape Series` choose `Intel Skylake`, check the box next to `VM Standard 2.4`.
+![Select Instance Flavor](./images/cci-shape.png)
+1. Continue to scroll down the CCI screen to the `Configure Networking` and change `Subnet` to  `Management_Network (Regional)` and validate that `ASSIGN A PUBLIC IP ADDRESS` is selected.           
+![Configure Networking](./images/CCI-networking.png)
+1. After the Network configuration, scroll do the `Add SSH Keys` section.  Select `Choose SSH key FILES` and select the file `Public_Key_authorized_keys.txt` file created in the SSH Key section
+![Configure Networking](./images/cci-ssh.png)
+1.  Choose `Create` to create the instance.
+
+### ATTACH VNICs to the ADC
+By default OCI will only deploy the instance with the Subnet defined in the Create Compute Instance Network Configuration.  The following steps will add the Public and Server networks to the Instance.
+
+1. Select `vThunderADC-3` under the instances List
+1. Scroll to the bottom of the page and select `Attached VNICs`
+![Instance Config VNICs](./images/instance-config-vnics.png)
+1. Choose `Create VNIC`
+![Create VNICs](./images/vnic-create-1.png)
+1. For name enter `Public_VNIC`,Select a Subnet choose `Public_Network`, Private IP address enter `10.0.1.12` and check 'ASSIGN A PUBLIC IP'
+![Create Public VNICs](./images/vnic-public-1.png)
+1. Save Changes
+1. Select `Create VNIC`
+1. For name enter `Server_VNIC`,Select a Subnet choose `Server_Network`, Private IP address enter `10.0.2.12` and check 'ASSIGN A PUBLIC IP'
+![Create Server VNICs](./images/vnic-server-1.png)
+1. At the top of the instance Details screen, select `Reboot` to restart the instance.  Once the instance restarts the remaining network interfaces are available to ACOS.
+
+# A10 vThunder CONFIGURATION
+## Configuring the primary vThunder device
