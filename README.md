@@ -1,5 +1,5 @@
 # DEPLOYMENT SCENARIO
-For this deployment example, a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure (OCI).
+For this deployment example,a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure (OCI).
 
 ![Deployment Scenario](./images/Deployment_Senario.png)
 _Figure 1:_ Example deployment topology and network information
@@ -127,14 +127,16 @@ During the vThunder deployment an SSH Key pair is required to allow SSH access t
 1. Click the `Save Private Key` and save the priate key as `ssh_key_priv.ppk` NOTE:  the .ppk file is used by Putty
 1. Under the Key section, select the text in the box labeled `Public key for pasting into OpenSSH authorized_keys file`
    1. Right-Click the window and `select-all`
-   1. Paste the text into a notepad document and save it in the same folder as the other keys.  
-   1. Save the file as `authorized_keys.pub`  
    ![PuTTY OpenSSH authorized_keys](./images/putty_authorized_keys.png)
+   1. Paste the text into a notepad document and save it in the same folder as the other keys.
+   authorized_keys_notepad.png
+   1. Save the file as `authorized_keys.pub`  
+   ![PuTTY OpenSSH Notepad](./images/authorized_keys_notepad.png)
 1. Select the `Conversions` dropdown and select `export OpenSSH key` and save the file as `ssh_key` with no extension.
 
 # Configure Oracle Cloud
 ## Create Virtual Cloud Network (VCN)
-**Table 2:  Example VCN and Subnet Assignement**
+**Table 1:  Example VCN and Subnet Assignement**
 
 Components|Name|Value|Notes
 --------------|--------------|--------------|--------------
@@ -143,7 +145,5 @@ Available Domains|PHX-AD-1, PHX-AD-2, PHX-AD-3||
 VCN|VCN-a10demo|10.0.0.0/16| Main Network that contains subnets below
 Subnet|Management|10.0.0.0/24|Public/Regional
  -|Public|10.0.1.0/24|Public/Regional
- -|Server|10.0.2.0/24|Private/Regional
+ -|Server|10.0.10.0/24|Private/Regional
  -|HA|10.0.3.0/24|Private/Regional
-
- end
