@@ -42,31 +42,25 @@ The instructions in this topic assume:
   * you are using Linux
   * you are following Oracle's recommendation to provide a passphrase to encrypt the private key
 
-The instructions below describe how to create a new ~/.oci directory, how to generate a new private key file and public key file in that ~/.oci directory, how to upload the public key to Oracle Cloud Infrastructure to create a new API signing key, and how to obtain a fingerprint for the public API key. Be aware that instructions and examples elsewhere in this documentation assume the ~/.oci directory exists and contains the private and public key files.
-
-If your user account already has an API signing key, create the ~/.oci directory if it doesn't exist, and then go straight to 2. Create a Profile in the Oracle Cloud Infrastructure CLI Configuration File.
-
-If your user account doesn't already have an API signing key, follow the steps below, but note the following:
-
-   * If the ~/.oci directory doesn't exist, create it.
-   * If the ~/.oci directory already exists, go straight to the step below that instructs you to generate a private key file.
-   * If the ~/.oci directory already exists and already contains a private key file and public key file, and you know the passphrase that was used to encrypt the existing private key file, there's no need to create new private and public key files. Instead, go straight to the step below that instructs you to create a new API signing key and upload the public key value to Oracle Cloud Infrastructure to obtain a fingerprint.
-   * If you already have a private key file and public key file but they are not in the ~/.oci directory, and you know the passphrase that was used to encrypt the existing private key file, there's no need to create new private and public key files. Having created the ~/.oci directory if it doesn't exist, go straight to the step below that instructs you to create a new API signing key and upload the public key value to Oracle Cloud Infrastructure to obtain a fingerprint.
-
 To set up an API signing key:
 
-1. Log in to your development environment as a functions developer.
+1. Log in to a Linux workstation.
 1. In a terminal window, confirm that the ~/.oci directory does not already exist. For example, by entering:
-  '<ls  ~/.oci>'
-1. Assuming the ~/.oci directory does not already exist, create it. For example, by entering:
-  'mkdir ~/.oci'
-1. Generate a private key encrypted with a passphrase that you provide by entering:
-  '$ openssl genrsa -out ~/.oci/<private-key-file-name>.pem -aes128 2048'
-  where '<private-key-file-name> is a name of your choice for the private key file (for example, john_api_key_private.pem).
 
+```ls  ~/.oci```
+
+1. Assuming the ~/.oci directory does not already exist, create it. For example, by entering:
+
+```mkdir ~/.oci```
+
+1. Generate a private key encrypted with a passphrase that you provide by entering:
+  ```$ openssl genrsa -out ~/.oci/<private-key-file-name>.pem -aes128 2048'
+  where '<private-key-file-name> is a name of your choice for the private key file (for example, john_api_key_private.pem).```
+  
   For example:
 
-  '$ openssl genrsa -out ~/.oci/john_api_key_private.pem -aes128 2048'
+  ```
+  $ openssl genrsa -out ~/.oci/john_api_key_private.pem -aes128 2048
 
   'Generating RSA private key, 2048 bit long modulus'
   ....+++
@@ -74,16 +68,21 @@ To set up an API signing key:
   e is 65537 (0x10001)
 
   Enter pass phrase for /Users/johndoe/.oci/john_api_key_private.pem:
+  ```
+  
   When prompted, enter a passphrase to encrypt the private key file. Be sure to make a note of the passphrase you enter, as you will need it later.
   When prompted, re-enter the passphrase to confirm it.
+  
   Confirm that the private key file has been created in the directory you specified. For example, by entering:
-
+'''
   $ ls -l ~/.oci/john_api_key_private.pem
-
+  
   -rw-r--r-- 1 johndoe staff 1766 Jul 14 00:24 /Users/johndoe/.oci/john_api_key_private.pem
-  Change permissions on the file to ensure that only you can read it. For example, by entering:
-
+  '''
+    Change permissions on the file to ensure that only you can read it. For example, by entering:
+'''
   $ chmod go-rwx ~/.oci/john_api_key_private.pem
+'''  
   Generate a public key (in the same location as the private key file) by entering:
 
   $ openssl rsa -pubout -in ~/.oci/<private-key-file-name>.pem -out ~/.oci/<public-key-file-name>.pem
@@ -100,7 +99,7 @@ To set up an API signing key:
   Confirm that the public key file has been created in the directory you specified. For example, by entering:
 
 
-  $ ls -l ~/.oci/
+  `$ ls -l ~/.oci/`
 
   -rw------- 1 johndoe staff 1766 Jul 14 00:24 john_api_key_private.pem
   -rw-r--r-- 1 johndoe staff 451 Jul 14 00:55 john_api_key_public.pem
