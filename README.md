@@ -23,13 +23,9 @@ The high-level configuration steps of this example deployment are as follows:
    1. High-availability (VRRP-A and failover) configuration
    1. SLB virtual service (VIP) configuration
 # API KEYS AND CONFIG FILE PREPARATION
-API keys are required to perform the VRRP-A failover process in an Oracle Cloud Infrastructure deployment. vThunder supports
-unicast-based VRRP-A to provide redundancy when an active vThunder goes down for any reason. In the Oracle Cloud environment,
-a public IP address is assigned for a VIP as a secondary IP on the uplink / gateway facing interface. The secondary public IP
-address(es) have to be moved from the failed vThunder to a new active vThunder when the failover is triggered. The A10 vThunder in
-the Oracle Cloud implements this workflow and can automatically move the VIP address(es) and other floating IP addresses to the
-new active vThunder using API-based Oracle functions.
+API keys are required to perform the VRRP-A failover process in an Oracle Cloud Infrastructure deployment. vThunder supports unicast-based VRRP-A to provide redundancy when an active vThunder goes down for any reason. In the Oracle Cloud environment, a public IP address is assigned for a VIP as a secondary IP on the uplink / gateway facing interface. The secondary public IP address(es) have to be moved from the failed vThunder to a new active vThunder when the failover is triggered. The A10 vThunder in the Oracle Cloud implements this workflow and can automatically move the VIP address(es) and other floating IP addresses to the new active vThunder using API-based Oracle functions.
 The following files need to be prepared before starting the vThunder configuration.
+
 * API key pair to create API signing key. For example,
   * Private key: oci_api_key.pem (RSA 2K key, PEM format)
   * Public key: oci_api_key_pub.pem
@@ -53,9 +49,11 @@ To set up an API signing key:
 ```
 $ openssl genrsa -out ~/.oci/<private-key-file-name>.pem -aes128 2048'
 ```
+
 where `<private-key-file-name>` is a name of your choice for the private key file (for example, john_api_key_private.pem).
 
    For example:
+
 ```
 $ openssl genrsa -out ~/.oci/john_api_key_private.pem -aes128 2048
 'Generating RSA private key, 2048 bit long modulus'
