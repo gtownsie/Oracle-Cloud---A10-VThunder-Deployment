@@ -1,16 +1,16 @@
 # DEPLOYMENT SCENARIO
-For this deployment example,a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure.
+For this deployment example,a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure (OCI).
 
 ![Deployment Scenario](./images/Deployment_Senario.png)
-_Figure 7:_ Example deployment topology and network information
+_Figure 1:_ Example deployment topology and network information
 
-#DEPLOYMENT PREREQUISITES
-To deploy vThunder ADC for a business application running in Oracle Cloud Infrastructure, the user needs the following:
+# DEPLOYMENT PREREQUISITES
+To deploy vThunder ADC for a business application running in OCI, the user needs the following:
 * Oracle Cloud Infrastructure accounts and access information
 * vThunder ADC (image available in the Oracle Cloud Marketplace)
-* vThunder License Prepare appropriate license
-* SSH key pair for SSH and console access to vThunder and other Linux VM instances hosted in Oracle Cloud.
-* Create a pair of Oracle API Public and Private Keys
+* vThunder License
+* SSH key pair for SSH and console access to vThunder
+* Oracle API Public and Private Key pair
 
 # CONFIGURATION STEPS OVERVIEW
 The high-level configuration steps of this example deployment are as follows:
@@ -19,10 +19,12 @@ The high-level configuration steps of this example deployment are as follows:
 1. Define and set VCN and subnets in Oracle Cloud
 1. Install two vThunder ADC instances
 1. Configure vThunder ADC
-   1. General and interfaces
-   1. High-availability (VRRP-A and failover) configuration
-   1. SLB virtual service (VIP) configuration
+  1. General and interfaces
+  1. High-availability (VRRP-A and failover) configuration
+  1. SLB virtual service (VIP) configuration
+
 # API KEYS AND CONFIG FILE PREPARATION
+
 API keys are required to perform the VRRP-A failover process in an Oracle Cloud Infrastructure deployment. vThunder supports unicast-based VRRP-A to provide redundancy when an active vThunder goes down for any reason. In the Oracle Cloud environment, a public IP address is assigned for a VIP as a secondary IP on the uplink / gateway facing interface. The secondary public IP address(es) have to be moved from the failed vThunder to a new active vThunder when the failover is triggered. The A10 vThunder in the Oracle Cloud implements this workflow and can automatically move the VIP address(es) and other floating IP addresses to the new active vThunder using API-based Oracle functions.
 The following files need to be prepared before starting the vThunder configuration.
 
@@ -46,17 +48,19 @@ To set up an API signing key:
 1. Assuming the `~/.oci` directory does not already exist, create it. For example, by entering:
 `mkdir ~/.oci`
 1. Generate a private key encrypted with a passphrase that you provide by entering:
-`$ openssl genrsa -out ~/.oci/<private-key-file-name>.pem -aes128 2048`
-where `<private-key-file-name>` is a name of your choice for the private key file (for example, `john_api_key_private.pem`).
+```
+$ openssl genrsa -out ~/.oci/<private-key-file-name>.pem -aes128 2048
+```
+where `<private-key-file-name>` is a name of your choice for the private key file (for example, `oci_api_key.pem`).
 
 For example:
 ```
-$ openssl genrsa -out ~/.oci/john_api_key_private.pem -aes128 2048
+$ openssl genrsa -out ~/.oci/oci_api_key.pem -aes128 2048
 'Generating RSA private key, 2048 bit long modulus'
 ....+++
 ....................................................................+++
 e is 65537 (0x10001)
-Enter pass phrase for /Users/johndoe/.oci/john_api_key_private.pem:
+Enter pass phrase for /Users/johndoe/.oci/oci_api_key.pem:
 ```
 When prompted, enter a passphrase to encrypt the private key file.
 * Be sure to make a note of the passphrase you enter, as you will need it later.  
@@ -64,13 +68,13 @@ When prompted, re-enter the passphrase to confirm it.
 
 Confirm that the private key file has been created in the directory you specified. For example, by entering:
 ```
-$ ls -l ~/.oci/john_api_key_private.pem
+$ ls -l ~/.oci/oci_api_key.pem
 
--rw-r--r-- 1 johndoe staff 1766 Jul 14 00:24 /Users/johndoe/.oci/john_api_key_private.pem
+-rw-r--r-- 1 johndoe staff 1766 Jul 14 00:24 /Users/johndoe/.oci/oci_api_key.pem
 ```
 Change permissions on the file to ensure that only you can read it. For example, by entering:
 ```
-$ chmod go-rwx ~/.oci/john_api_key_private.pem
+$ chmod go-rwx ~/.oci/oci_api_key.pem
 ```
 Generate a public key (in the same location as the private key file) by entering:
 ```
@@ -78,25 +82,25 @@ $ openssl rsa -pubout -in ~/.oci/<private-key-file-name>.pem -out ~/.oci/<public
 ```
 where:
 
-`<private-key-file-name>` is what you specified earlier as the name of the private key file (for example, `john_api_key_private.pem`)
-`<public-key-file-name>` is a name of your choice for the public key file (for example, `john_api_key_public.pem`)
+`<private-key-file-name>` is what you specified earlier as the name of the private key file (for example, `oci_api_key.pem`)
+`<public-key-file-name>` is a name of your choice for the public key file (for example, `oci_api_key_pub.pem`)
 
 For example:
 ```
-$ openssl rsa -pubout -in ~/.oci/john_api_key_private.pem -out ~/.oci/john_api_key_public.pem
+$ openssl rsa -pubout -in ~/.oci/oci_api_key.pem -out ~/.oci/oci_api_key_pub.pem
 
-Enter pass phrase for `/Users/johndoe/.oci/john_api_key_private.pem`:
+Enter pass phrase for `/Users/johndoe/.oci/oci_api_key.pem`:
 ```
 When prompted, enter the same passphrase you previously entered to encrypt the private key file.
 Confirm that the public key file has been created in the directory you specified. For example, by entering:
 ```
 $ ls -l ~/.oci/
--rw------- 1 johndoe staff 1766 Jul 14 00:24 john_api_key_private.pem
--rw-r--r-- 1 johndoe staff 451 Jul 14 00:55 john_api_key_public.pem
+-rw------- 1 johndoe staff 1766 Jul 14 00:24 oci_api_key.pem
+-rw-r--r-- 1 johndoe staff 451 Jul 14 00:55 oci_api_key_pub.pem
 ```
 Copy the contents of the public key file you just created. For example, by entering:
 ```
-$ cat ~/.oci/john_api_key_public.pem | pbcopy
+$ cat ~/.oci/oci_api_key_pub.pem | pbcopy
 ```
 Having created the API key pair, upload the public key value to Oracle Cloud Infrastructure:
 
@@ -120,4 +124,22 @@ During the vThunder deployment an SSH Key pair is required to allow SSH access t
 1. Select the `Generate` button and move the mouse in the empty area until the key has been successfully generated.
 1. Click the `Save public key` and save the file as `ssh_key.pub`
 1. Click the `Save Private Key` and save the priate key as `ssh_key_priv.ppk` NOTE:  the .ppk file is used by Putty
+1. Under the Key section, select the text in the box labeled `Public key for pasting into OpenSSH authorized_keys file`
+  1. Right-Click the window and `select-all`
+  1. Paste the text into a notepad document and save it in the same folder as the other keys.  
+  1. Save the file as `authorized_keys.pub`  
 1. Select the `Conversions` dropdown and select `export OpenSSH key` and save the file as `ssh_key` with no extension.
+
+# Configure Oracle Cloud
+## Create Virtual Cloud Network (VCN)
+**Table 2:  Example VCN and Subnet Assignement**
+
+Components|Name|Value|Notes
+--------------|--------------|--------------|--------------
+Region|US-West PHoenix||
+Available Domains|PHX-AD-1, PHX-AD-2, PHX-AD-3||
+VCN|VCN-a10demo|10.0.0.0/16| Main Network that contains subnets below
+Subnet|Management|10.0.0.0/24|Public/Regional
+|Public|10.0.1.0/24|Public/Regional
+|Server|10.0.2.0/24|Private/Regional
+|HA|10.0.3.0/24|Private/Regional
