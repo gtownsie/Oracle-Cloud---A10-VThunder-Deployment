@@ -92,7 +92,7 @@ To set up an API signing key:
 
 1. Log in to your development environment as a functions developer.
 1. In a terminal window, confirm that the ~/.oci directory does not already exist. For example, by entering:
-  'ls  ~/.oci'
+  '<ls  ~/.oci>'
 1. Assuming the ~/.oci directory does not already exist, create it. For example, by entering:
   'mkdir ~/.oci'
 1. Generate a private key encrypted with a passphrase that you provide by entering:
