@@ -42,33 +42,23 @@ To set up an API signing key:
 
 1. Log in to a Linux workstation.
 1. In a terminal window, confirm that the `~/.oci` directory does not already exist. For example, by entering:
-
 `ls  ~/.oci`
-
 1. Assuming the `~/.oci` directory does not already exist, create it. For example, by entering:
-
 `mkdir ~/.oci`
-
 1. Generate a private key encrypted with a passphrase that you provide by entering:
-
-
 $ openssl genrsa -out ~/.oci/<private-key-file-name>.pem -aes128 2048'
-
-
 where `<private-key-file-name>` is a name of your choice for the private key file (for example, `john_api_key_private.pem`).
 For example:
-
-
+```
 $ openssl genrsa -out ~/.oci/john_api_key_private.pem -aes128 2048
 'Generating RSA private key, 2048 bit long modulus'
 ....+++
 ....................................................................+++
 e is 65537 (0x10001)
 Enter pass phrase for /Users/johndoe/.oci/john_api_key_private.pem:
-
-
+```
 When prompted, enter a passphrase to encrypt the private key file. 
-Be sure to make a note of the passphrase you enter, as you will need it later.  
+* Be sure to make a note of the passphrase you enter, as you will need it later.  
 When prompted, re-enter the passphrase to confirm it.
 
 Confirm that the private key file has been created in the directory you specified. For example, by entering:
