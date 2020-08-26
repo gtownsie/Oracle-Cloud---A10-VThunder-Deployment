@@ -14,8 +14,8 @@ To deploy vThunder ADC for a business application running in Oracle Cloud Infras
 
 # CONFIGURATION STEPS OVERVIEW
 The high-level configuration steps of this example deployment are as follows:
+1. Prepare Oracle API Public and Private Keys
 1. Prepare API keys (used for HA failover operation)
-1. Prepair Oracle API Public and Private Keys
 1. Define and set VCN and subnets in Oracle Cloud
 1. Install two vThunder ADC instances
 1. Configure vThunder ADC
@@ -58,7 +58,7 @@ $ openssl genrsa -out ~/.oci/john_api_key_private.pem -aes128 2048
 e is 65537 (0x10001)
 Enter pass phrase for /Users/johndoe/.oci/john_api_key_private.pem:
 ```
-When prompted, enter a passphrase to encrypt the private key file. 
+When prompted, enter a passphrase to encrypt the private key file.
 * Be sure to make a note of the passphrase you enter, as you will need it later.  
 When prompted, re-enter the passphrase to confirm it.
 
@@ -111,3 +111,13 @@ Paste the public key's value into the window and click Add.
 The key is uploaded and its fingerprint is displayed (for example, `d1:b2:32:53:d3:5f:cf:68:2d:6f:8b:5f:77:8f:07:13`).
 
 Note the fingerprint value. You'll use the fingerprint in a subsequent configuration task.
+## Prepare SSH keys
+During the vThunder deployment an SSH Key pair is required to allow SSH access to the instances after deployment.  The following steps will outline the process to generate the key pair using the `puttygen` utility.
+1. Install putty on your workstation from the putty site:  https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
+1. After the installation is complete run the `puttygen` utility
+1. Select `Key` dropdown and verify that it is set to `SSH-2 RSA`
+1. For the type of key to generate, select `RSA` with `2048` bits
+1. Select the `Generate` button and move the mouse in the empty area until the key has been successfully generated.
+1. Click the `Save public key` and save the file as `ssh_key.pub`
+1. Click the `Save Private Key` and save the priate key as `ssh_key_priv.ppk` NOTE:  the .ppk file is used by Putty
+1. Select the `Conversions` dropdown and select `export OpenSSH key` and save the file as `ssh_key` with no extension.
