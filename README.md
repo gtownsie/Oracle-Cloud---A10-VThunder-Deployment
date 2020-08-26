@@ -67,10 +67,11 @@ e is 65537 (0x10001)
 Enter pass phrase for /Users/johndoe/.oci/john_api_key_private.pem:
 
 
-When prompted, enter a passphrase to encrypt the private key file. Be sure to make a note of the passphrase you enter, as you will need it later.  
+When prompted, enter a passphrase to encrypt the private key file. 
+Be sure to make a note of the passphrase you enter, as you will need it later.  
 When prompted, re-enter the passphrase to confirm it.
 
-    Confirm that the private key file has been created in the directory you specified. For example, by entering:
+Confirm that the private key file has been created in the directory you specified. For example, by entering:
 
 $ ls -l ~/.oci/john_api_key_private.pem
 
