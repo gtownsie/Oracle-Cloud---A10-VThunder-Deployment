@@ -53,7 +53,8 @@ To set up an API signing key:
 ```
 $ openssl genrsa -out ~/.oci/<private-key-file-name>.pem -aes128 2048'
 ```
-where `<private-key-file-name>` is a name of your choice for the private key file (for example, john_api_key_private.pem).
+
+where `<private-key-file-name>` is a name of your choice for the private key file (for example, `john_api_key_private.pem`).
 
    For example:
 ```
