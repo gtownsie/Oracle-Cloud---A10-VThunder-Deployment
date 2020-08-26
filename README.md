@@ -136,14 +136,75 @@ During the vThunder deployment an SSH Key pair is required to allow SSH access t
 
 # Configure Oracle Cloud
 ## Create Virtual Cloud Network (VCN)
+The next step is to create the VCN within Oracle Cloud.  Table 1 reflects the VCN network and the sub-networks contained within the VCN.  
+
 **Table 1:  Example VCN and Subnet Assignement**
 
 Components|Name|Value|Notes
 --------------|--------------|--------------|--------------
 Region|US-West PHoenix||
 Available Domains|PHX-AD-1, PHX-AD-2, PHX-AD-3||
-VCN|VCN-a10demo|10.0.0.0/16| Main Network that contains subnets below
+VCN|VCN-a10demo|10.0.0.0/20| Main Network that contains subnets below
 Subnet|Management|10.0.0.0/24|Public/Regional
  -|Public|10.0.1.0/24|Public/Regional
  -|Server|10.0.10.0/24|Private/Regional
  -|HA|10.0.3.0/24|Private/Regional
+
+### Create VCN
+1. Login to the Oracle Cloud web interfaces
+1. Select the "hamburger" menu dropdown in the upper left corner, Select `Networking/Virtual Cloud Networks`
+1. Click on the `Create VCN` and fill out the form with the following parameters:
+   1. Name:  `VCN_a10demo`
+   1. CIDR BLOCK: `10.0.0.0/20`![Create VCN](./images/create_vcn.png)
+1. Select `Create VCN`
+
+### Create subnets
+1. Go into the `VCN_a10dmo` configuration page
+1. Select `Create Subnet`
+![Create VCN Subnet](./images/vcn_create_subnet.png)
+1. Create the Management Network using the following configuration:
+   1. Name:  `Management_Network`
+   1. Subnet Type:  `Regional`
+   1. CIDR BLOCK: `10.0.0.0/24`
+   1. Route Table: `Default Route Table for VCN_a10demo`
+   1. Subnet Access:  `Public Subnet`
+   1. DHCP Options: `Default DHCP Options for VCN_a10demo`
+   1. Security List: `Default Security List for VCN_a10demo`
+1. Choose `Create Subnet`
+1. Create the Public Network using the following configuration:
+   1. Name:  `Public_Network`
+   1. Subnet Type:  `Regional`
+   1. CIDR BLOCK: `10.0.1.0/24`
+   1. Route Table: `Default Route Table for VCN_a10demo`
+   1. Subnet Access:  `Public Subnet`
+   1. DHCP Options: `Default DHCP Options for VCN_a10demo`
+   1. Security List: `Default Security List for VCN_a10demo`
+1. Choose `Create Subnet`
+1. Create the Server Network using the following configuration:
+   1. Name:  `Server_Network`
+   1. Subnet Type:  `Regional`
+   1. CIDR BLOCK: `10.0.2.0/24`
+   1. Route Table: `Default Route Table for VCN_a10demo`
+   1. Subnet Access:  `Private Subnet` **<-- Note: the Server network will use the Private Subnet**
+   1. DHCP Options: `Default DHCP Options for VCN_a10demo`
+   1. Security List: `Default Security List for VCN_a10demo`
+1. Choose `Create Subnet`
+
+Once completed the Subnets for the VCN will reflect the following:
+![VCN Configuration ](./images/vcn_configuration.png)
+
+### Modify VCN Security Policy
+By default the VCN security policy only allows SSH, ICMP Type 3 code 4, and ICMP type 3 from the VCN main Net block (10.0.0.0/20).  *This policy also applies to device to device connectivity within the VCN subnets*.  For this lab the security policy is set to ANY/ANY all protocols.  
+
+***THIS IS NOT RECOMMENDED FOR A PRODUCTION ENVIRONMENT  ONCE THE CONFIGURATION IS COMPLETE PLEASE FOLLOW YOUR COMPANY STANDARDS FOR SECURITY POLICIES***
+
+To modify the security policy, follow the following steps:
+1.  From the VCN configuration screen, under Resources, select `Security Lists`
+1.  Choose `Default Security List for VCN_a10demo`
+![add ingress rule](./images/add_ingress_rule.png)
+1.  `add ingress rule` with the following settings:
+    1.  Source type:  `CIDR`
+    1.  Source CIDR:  `0.0.0.0/0`
+    1.  IP Protocol:  `All Protocols`
+![add ingress rule](./images/add_ingress_rule_1.png)
+1. `Save Changes`
