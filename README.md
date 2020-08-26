@@ -89,7 +89,7 @@ Enter pass phrase for `/Users/johndoe/.oci/john_api_key_private.pem`:
 ```
 When prompted, enter the same passphrase you previously entered to encrypt the private key file.
 Confirm that the public key file has been created in the directory you specified. For example, by entering:
-````
+```
 $ ls -l ~/.oci/
 -rw------- 1 johndoe staff 1766 Jul 14 00:24 john_api_key_private.pem
 -rw-r--r-- 1 johndoe staff 451 Jul 14 00:55 john_api_key_public.pem
