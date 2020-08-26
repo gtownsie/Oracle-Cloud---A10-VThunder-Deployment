@@ -1,5 +1,5 @@
 # DEPLOYMENT SCENARIO
-For this deployment example,a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure (OCI).
+For this deployment example, a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure (OCI).
 
 ![Deployment Scenario](./images/Deployment_Senario.png)
 _Figure 1:_ Example deployment topology and network information
