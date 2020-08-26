@@ -16,7 +16,7 @@ To deploy vThunder ADC for a business application running in OCI, the user needs
 The high-level configuration steps of this example deployment are as follows:
 1. Prepare Oracle API Public and Private Keys
 1. Prepare API keys (used for HA failover operation)
-1. Define and set VCN and subnets in Oracle Cloud
+1. Define and set VCN, subnets, and security rules in Oracle Cloud
 1. Install two vThunder ADC instances
 1. Configure vThunder ADC
   1. General and interfaces
@@ -110,11 +110,12 @@ Log in to the Console as the Oracle Cloud Infrastructure user who will be using 
 1. Click **User Settings** to view the details.
 1. On the **API Keys** page, click Add **Public Key**.
 
-Paste the public key's value into the window and click Add.
+Paste the public key's value from the `oci_api_key_pub.pem` into the window and click Add.
 
 The key is uploaded and its fingerprint is displayed (for example, `d1:b2:32:53:d3:5f:cf:68:2d:6f:8b:5f:77:8f:07:13`).
 
-Note the fingerprint value. You'll use the fingerprint in a subsequent configuration task.
+> **Note the fingerprint value. You'll use the fingerprint in a subsequent configuration task.**
+
 ## Prepare SSH keys
 During the vThunder deployment an SSH Key pair is required to allow SSH access to the instances after deployment.  The following steps will outline the process to generate the key pair using the `puttygen` utility.
 1. Install putty on your workstation from the putty site:  https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
@@ -127,7 +128,7 @@ During the vThunder deployment an SSH Key pair is required to allow SSH access t
 1. Click the `Save Private Key` and save the priate key as `ssh_key_priv.ppk` NOTE:  the .ppk file is used by Putty
 1. Under the Key section, select the text in the box labeled `Public key for pasting into OpenSSH authorized_keys file`
    1. Right-Click the window and `select-all`
-   ![PuTTY OpenSSH authorized_keys](./images/putty_authorized_keys.png)
+   </BR>![PuTTY OpenSSH authorized_keys](./images/putty_authorized_keys.png)
    1. Paste the text into a notepad document and save it in the same folder as the other keys.
    authorized_keys_notepad.png
    1. Save the file as `authorized_keys.pub`  
@@ -196,7 +197,7 @@ Once completed the Subnets for the VCN will reflect the following:
 ### Modify VCN Security Policy
 By default the VCN security policy only allows SSH, ICMP Type 3 code 4, and ICMP type 3 from the VCN main Net block (10.0.0.0/20).  *This policy also applies to device to device connectivity within the VCN subnets*.  For this lab the security policy is set to ANY/ANY all protocols.  
 
-***THIS IS NOT RECOMMENDED FOR A PRODUCTION ENVIRONMENT  ONCE THE CONFIGURATION IS COMPLETE PLEASE FOLLOW YOUR COMPANY STANDARDS FOR SECURITY POLICIES***
+> ***THIS IS NOT RECOMMENDED FOR A PRODUCTION ENVIRONMENT  ONCE THE CONFIGURATION IS COMPLETE PLEASE FOLLOW YOUR COMPANY STANDARDS FOR SECURITY POLICIES***
 
 To modify the security policy, follow the following steps:
 1.  From the VCN configuration screen, under Resources, select `Security Lists`
@@ -208,3 +209,24 @@ To modify the security policy, follow the following steps:
     1.  IP Protocol:  `All Protocols`
 ![add ingress rule](./images/add_ingress_rule_1.png)
 1. `Save Changes`
+
+# Create a10 vThunder instances
+TABLE 2: VTHUNDER ADC INSTANCE AND NETWORK CONFIGURATION SPECIFICATIONS
+
+-|PRIMARY ADC|SECONDARY ADC|NOTES
+---------------|---------------------|--------------------|---------------
+Instance Name|vThunderADC-1|vThunderADC-2|
+Availability Domain|AD1|AD2|
+Instance Shape|VM.Standard 2.4|VM.Standard 2.4|Selected based on VNIC counts (4) required in this deployment
+CONFIGURE NETWORKING
+VCN Compartment|a10demo|a10demo
+VCN|VCN-a10demo|VCN-a10demo
+Subnet Compartment|a10demo|a10demo|
+Subnet|Management_Network|Management_Network|For mgmt. interface
+Public IP assignment|Yes|Yes
+
+## Create Primary ADC instance
+1. From the OCI screen, select the dropdown menu in the upper left corner
+1. Select `Compute/Instances`
+1. Click on `Create Instance`
+1. 
