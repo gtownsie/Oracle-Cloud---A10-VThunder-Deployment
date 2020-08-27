@@ -1,6 +1,5 @@
 # Table of contents
-
- <!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+<!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
 
 - [Table of contents](#table-of-contents)   
 - [DEPLOYMENT SCENARIO](#deployment-scenario)   
@@ -21,10 +20,13 @@
    - [Create Secondary ADC instance](#create-secondary-adc-instance)   
       - [ATTACH VNICs to the ADC](#attach-vnics-to-the-adc)   
 - [A10 vThunder CONFIGURATION](#a10-vthunder-configuration)   
-   - [Configuring the primary vThunder device](#configuring-the-primary-vthunder-device)   
+   - [Primary vThunder - Configure Network Interface](#primary-vthunder-configure-network-interface)   
+      - [Configure DNS and Hostname](#configure-dns-and-hostname)   
+   - [Secondary vThunder - Configure Network Interface](#secondary-vthunder-configure-network-interface)   
+      - [Configure DNS and Hostname](#configure-dns-and-hostname)   
+   - [configure redundancy](#configure-redundancy)   
 
 <!-- /MDTOC -->
-
 
 # DEPLOYMENT SCENARIO
 For this deployment example,a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure (OCI).
@@ -487,3 +489,5 @@ Server Network|10.0.2.12|10.0.2.10
     ```
 1.  Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
 1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
+
+## configure redundancy
