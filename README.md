@@ -358,59 +358,59 @@ Server Network|10.0.2.11|10.0.2.10
 1. Add the DNS server by typing `ip dns primary 8.8.8.8`
 1. Add the hostname by typing `vThunderADC-1`
 1.  Validate the configuration by issuing a `sh run` command, it should mirror the following (some lines redacted):
-```
-vThunderADC-1(config)(NOLICENSE)#sh run
-!
-ip dns primary 8.8.8.8
-!
-hostname vThunderADC-1
-!
-end
-```
+    ```
+    vThunderADC-1(config)(NOLICENSE)#sh run
+    !    
+    ip dns primary 8.8.8.8
+    !
+    hostname vThunderADC-1
+    !
+    end
+    ```
 1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are creaated and the instance is rebooted:
-```
-vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
-Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
-mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
-1       Disb  None  None   none  1    0200.1703.f7b9  0.0.0.0/0             0
-2       Disb  None  None   none  1    0200.1703.062e  0.0.0.0/0             0
-```
+    ```
+    vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
+    Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
+    mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
+    1       Disb  None  None   none  1    0200.1703.f7b9  0.0.0.0/0             0
+    2       Disb  None  None   none  1    0200.1703.062e  0.0.0.0/0             0
+    ```
 1. Set the IP address of the Public Network by creating the following VLANS by issuing the following commands *NOTE: VLAN tagging is disabled, the vlan tags themselves are not use.  Any tag number can be used.  In this example the vlan tag was pulled from the `Attached VNICs` menu*:
-```
-vlan 2125
-untagged ethernet 1
-router-interface ve 2125
-name "Public Network"
-!
-interface ve 2125
-ip address 10.0.1.11 /24
-!
-vlan 2126
-untagged ethernet 2
-router-interface ve 2126
-name "Server Network"
-!
-interface ve 2126
-ip address 10.0.2.11 /24
-!
-```
+    ```    
+    vlan 2125
+    untagged ethernet 1
+    router-interface ve 2125
+    name "Public Network"
+    !
+    interface ve 2125
+    ip address 10.0.1.11 /24
+    !
+    vlan 2126
+    untagged ethernet 2
+    router-interface ve 2126
+    name "Server Network"
+    !
+    interface ve 2126
+    ip address 10.0.2.11 /24
+    !
+    ```
 1.  Validate the configuration by running the 'sh interfaces brief' command again.  Below is an example of the output.
-```
-vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
-Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
-mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
-1       Disb  None  None   none  2125 0200.1703.f7b9  0.0.0.0/0             0
-2       Disb  None  None   none  2126 0200.1703.062e  0.0.0.0/0             0
-ve2125  Down  N/A   N/A    N/A   2125 0200.1703.f7b9  10.0.1.11/24          1
-ve2126  Down  N/A   N/A    N/A   2126 0200.1703.062e  10.0.2.11/24          1
-```
+    ```
+    vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
+    Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
+    mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
+    1       Disb  None  None   none  2125 0200.1703.f7b9  0.0.0.0/0             0
+    2       Disb  None  None   none  2126 0200.1703.062e  0.0.0.0/0             0
+    ve2125  Down  N/A   N/A    N/A   2125 0200.1703.f7b9  10.0.1.11/24          1
+    ve2126  Down  N/A   N/A    N/A   2126 0200.1703.062e  10.0.2.11/24          1
+    ```
 1. Enable the ethernet interfaces by running the following commands:
-```
-interface ethernet 1
-enable
-interface ethernet 2
-enable
-```
+    ```
+    interface ethernet 1
+    enable
+    interface ethernet 2
+    enable
+    ```
 1.  Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
 1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
 
@@ -443,47 +443,47 @@ Server Network|10.0.2.12|10.0.2.10
     ```
 1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are creaated and the instance is rebooted:
     ```
-vThunderADC-2(config)(NOLICENSE)#sh interfaces brief
-Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
-mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.4/24           1
-1       Disb  None  None   none  1    0200.1703.f7b9  0.0.0.0/0             0
-2       Disb  None  None   none  1    0200.1703.062e  0.0.0.0/0             0
+    vThunderADC-2(config)(NOLICENSE)#sh interfaces brief
+    Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
+    mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.4/24           1
+    1       Disb  None  None   none  1    0200.1703.f7b9  0.0.0.0/0             0
+    2       Disb  None  None   none  1    0200.1703.062e  0.0.0.0/0             0
     ```
 1. Set the IP address of the Public Network by creating the following VLANS by issuing the following commands *NOTE: VLAN tagging is disabled, the vlan tags themselves are not use.  Any tag number can be used.  In this example the vlan tag was pulled from the `Attached VNICs` menu*:
-```
-vlan 2125
-untagged ethernet 1
-router-interface ve 2125
-name "Public Network"
-!
-interface ve 2125
-ip address 10.0.1.12 /24
-!
-vlan 2126
-untagged ethernet 2
-router-interface ve 2126
-name "Server Network"
-!
-interface ve 2126
-ip address 10.0.2.12 /24
-!
-```
+    ```
+    vlan 2125
+    untagged ethernet 1
+    router-interface ve 2125
+    name "Public Network"
+    !
+    interface ve 2125
+    ip address 10.0.1.12 /24
+    !
+    vlan 2126
+    untagged ethernet 2
+    router-interface ve 2126
+    name "Server Network"
+    !
+    interface ve 2126
+    ip address 10.0.2.12 /24
+    !
+    ```
 1.  Validate the configuration by running the 'sh interfaces brief' command again.  Below is an example of the output.
-```
-vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
-Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
-mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
-1       Disb  None  None   none  2125 0200.1703.f7b9  0.0.0.0/0             0
-2       Disb  None  None   none  2126 0200.1703.062e  0.0.0.0/0             0
-ve2125  Down  N/A   N/A    N/A   2125 0200.1703.f7b9  10.0.1.11/24          1
-ve2126  Down  N/A   N/A    N/A   2126 0200.1703.062e  10.0.2.11/24          1
-```
+    ```
+    vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
+    Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
+    mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
+    1       Disb  None  None   none  2125 0200.1703.f7b9  0.0.0.0/0             0
+    2       Disb  None  None   none  2126 0200.1703.062e  0.0.0.0/0             0
+    ve2125  Down  N/A   N/A    N/A   2125 0200.1703.f7b9  10.0.1.11/24          1
+    ve2126  Down  N/A   N/A    N/A   2126 0200.1703.062e  10.0.2.11/24          1
+    ```
 1. Enable the ethernet interfaces by running the following commands:
-```
-interface ethernet 1
-enable
-interface ethernet 2
-enable
-```
+    ```
+    interface ethernet 1
+    enable
+    interface ethernet 2
+    enable    
+    ```
 1.  Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
 1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
