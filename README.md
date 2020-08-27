@@ -1,29 +1,3 @@
-<!-- MDTOC maxdepth:2 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
-
-- [DEPLOYMENT SCENARIO](#deployment-scenario)   
-- [DEPLOYMENT PREREQUISITES](#deployment-prerequisites)   
-- [CONFIGURATION STEPS OVERVIEW](#configuration-steps-overview)   
-- [API KEYS AND CONFIG FILE PREPARATION](#api-keys-and-config-file-preparation)   
-   - [Set up an Oracle Cloud Infrastructure API Signing Key for Use with Oracle Functions](#set-up-an-oracle-cloud-infrastructure-api-signing-key-for-use-with-oracle-functions)   
-   - [Prepare SSH keys](#prepare-ssh-keys)   
-- [Configure Oracle Cloud](#configure-oracle-cloud)   
-   - [Create Virtual Cloud Network (VCN)](#create-virtual-cloud-network-vcn)   
-   - [Create Public NETWORK](#create-public-network)   
-   - [Oracle Cloud Infrastructure CLI configuration file (txt format)](#oracle-cloud-infrastructure-cli-configuration-file-txt-format)   
-- [Create a10 vThunder instances](#create-a10-vthunder-instances)   
-   - [Create Primary ADC instance](#create-primary-adc-instance)   
-   - [Create Secondary ADC instance](#create-secondary-adc-instance)   
-- [A10 vThunder CONFIGURATION](#a10-vthunder-configuration)   
-   - [Primary vThunder - Configure Network Interface](#primary-vthunder-configure-network-interface)   
-   - [Secondary vThunder - Configure Network Interface](#secondary-vthunder-configure-network-interface)   
-- [Redundancy Configuration](#redundancy-configuration)   
-   - [IMPORT API PRIVATE KEY AND CLOUD CONFIG FILE TO VTHUNDER ADC](#import-api-private-key-and-cloud-config-file-to-vthunder-adc)   
-   - [HIGH AVAILABILITY (VRRP-A) CONFIGURATION](#high-availability-vrrp-a-configuration)   
-
-<!-- /MDTOC -->
-
-
-
 
 # DEPLOYMENT SCENARIO
 For this deployment example,a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure (OCI).
@@ -202,8 +176,17 @@ Subnet|Management|10.0.0.0/24|Public/Regional
    ![Create VCN](./images/vcn_modify_management.png)
 1. Select `Pr Subnet-VCN_a10demo`
 1. Select `Edit`
-1. Change Name to `Management_Network` and `Save Changes`
+1. Change Name to `Server_Network` and `Save Changes`
    ![Create VCN](./images/vcn_modify_server.png)
+1.  Choose `Default Security List for VCN_a10demo`
+   ![add ingress rule](./images/add_ingress_rule.png)
+1.  `add ingress rule` with the following settings:
+   1.  Source type:  `CIDR`
+   1.  Source CIDR:  `0.0.0.0/0`
+   1.  IP Protocol:  `All Protocols`
+
+   ![add ingress rule](./images/add_ingress_rule_1.png)
+1. `Save Changes`
 
 ## Create Public NETWORK
 1. Create Route Table by going into Route tables under resources and choosing `Create Route Table`
@@ -287,6 +270,7 @@ Public IP assignment|Yes|Yes
 
 ## Create Primary ADC instance
 Next a the Secondary ADC instance is created using the following settings.
+
 Name|IP Address|Floating IP
 ---------|---------|---------
 Instance Name|vThunderADC-1|
@@ -359,7 +343,7 @@ Server Network|10.0.2.12|10.0.2.10
 ### ATTACH VNICs to the ADC
 By default OCI will only deploy the instance with the Subnet defined in the Create Compute Instance Network Configuration.  The following steps will add the Public and Server networks to the Instance.
 
-1. Select `vThunderADC-3` under the instances List
+1. Select `vThunderADC-2` under the instances List
 1. Scroll to the bottom of the page and select `Attached VNICs`
 ![Instance Config VNICs](./images/instance-config-vnics.png)
 1. Choose `Create VNIC`
@@ -389,7 +373,7 @@ Server Network|10.0.2.11|10.0.2.10
 1. SSH into the public IP address of the vThunderADC-1 instances using the SSH keys created earlier in this document
 1. Type `enable` and `config t` to go into configuration mode.
 1. Add the DNS server by typing `ip dns primary 8.8.8.8`
-1. Add the hostname by typing `vThunderADC-1`
+1. Add the hostname by typing `hostname vThunderADC-1`
 1.  Validate the configuration by issuing a `sh run` command, it should mirror the following (some lines redacted):
     ```
     vThunderADC-1(config)(NOLICENSE)#sh run
@@ -398,7 +382,7 @@ Server Network|10.0.2.11|10.0.2.10
     !
     hostname vThunderADC-1
     !
-    end
+
     ```
 1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are creaated and the instance is rebooted:
     ```
@@ -414,18 +398,22 @@ Server Network|10.0.2.11|10.0.2.10
     untagged ethernet 1
     router-interface ve 2125
     name "Public Network"
+    exit
     !
     interface ve 2125
     ip address 10.0.1.11 /24
+    exit
     !
     vlan 2126
     untagged ethernet 2
     router-interface ve 2126
     name "Server Network"
+    exit
     !
     interface ve 2126
     ip address 10.0.2.11 /24
-    !
+    exit
+    wr mem
     ```
 1.  Validate the configuration by running the 'sh interfaces brief' command again.  Below is an example of the output.
     ```
@@ -443,9 +431,18 @@ Server Network|10.0.2.11|10.0.2.10
     enable
     interface ethernet 2
     enable
+    wr mem
     ```
-1.  Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
-1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
+1. To allow synchronization between the two vThunder instances SSH must be allowed on the interfaces.  SSH is the method which A10 synchronizes the configurations.
+    ```
+    enable-management service ssh
+      ve 2125 to 2126
+      exit-module
+    !
+    wr mem
+    ```
+1. Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
+1. Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
 
 ## Secondary vThunder - Configure Network Interface
 The next step is the configuration of the data plane network interfaces, default gateway, DNS, and Hostname.
@@ -463,7 +460,7 @@ Server Network|10.0.2.12|10.0.2.10
 1. SSH into the public IP address of the vThunderADC-1 instances using the SSH keys created earlier in this document
 1. Type `enable` and `config t` to go into configuration mode.
 1. Add the DNS server by typing `ip dns primary 8.8.8.8`
-1. Add the hostname by typing `vThunderADC-2`
+1. Add the hostname by typing `hostname vThunderADC-2`
 1.  Validate the configuration by issuing a `sh run` command, it should mirror the following (some lines redacted):
     ```
     vThunderADC-2(config)(NOLICENSE)#sh run
@@ -473,6 +470,7 @@ Server Network|10.0.2.12|10.0.2.10
     hostname vThunderADC-2
     !
     end
+    wr mem
     ```
 1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are creaated and the instance is rebooted:
     ```
@@ -488,18 +486,23 @@ Server Network|10.0.2.12|10.0.2.10
     untagged ethernet 1
     router-interface ve 2125
     name "Public Network"
+    exit
     !
     interface ve 2125
     ip address 10.0.1.12 /24
+    exit
     !
     vlan 2126
     untagged ethernet 2
     router-interface ve 2126
     name "Server Network"
+    exit
     !
     interface ve 2126
     ip address 10.0.2.12 /24
+    exit
     !
+    wr mem
     ```
 1.  Validate the configuration by running the 'sh interfaces brief' command again.  Below is an example of the output.
     ```
@@ -516,9 +519,18 @@ Server Network|10.0.2.12|10.0.2.10
     interface ethernet 1
     enable
     interface ethernet 2
-    enable    
+    enable
+    wr mem    
     ```
-1.  Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
+1. To allow synchronization between the two vThunder instances SSH must be allowed on the interfaces.  SSH is the method which A10 synchronizes the configurations.
+```
+enable-management service ssh
+  ve 2125 to 2126
+  exit-module
+!
+wr mem
+```
+1. Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
 1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
 
 # Redundancy Configuration
@@ -530,8 +542,7 @@ A10 vThunder ADC has a tighter integration with Oracle Cloud Infrastructure usin
 1. Locate the API private key `(oci_api_key.pem)` prepared in the API Key Preparation section. On the vThunder CLI (config) mode, import the file as `oci_api_key.pem`. By default, this file is stored in the vThunder under the /a10data/cloud/ directory.
 ```
     vThunderADC-1# conf
-    vThunderADC-1(config)#import cloud-creds oci_api_key.pem use-mgmt-port scp://192.168.0.254/root/
-    oci/oci_api_key.pem
+    vThunderADC-1(config)#import cloud-creds oci_api_key.pem use-mgmt-port scp://a.b.c.d/root/oci/oci_api_key.pem
     User name []?root
     Password []?
     Done.
@@ -542,36 +553,52 @@ A10 vThunder ADC has a tighter integration with Oracle Cloud Infrastructure usin
     oci_api_key.pem 0400
     --------------------------------------------------
 ```
-> NOTE: The user can also download the file from a file share service such as Dropbox using the shared download link. Copy and paste the link into the command, as shown below. If the link is not set with a password, the user can use the vThunder login and password (Default user: admin, default password: <Unique ID of the Instance OCID>)
-
+    **NOTE: The user can also download the file from a file share service such as Dropbox using the shared download link. Copy and paste the link into the command, as shown below. If the link is not set with a password, the user can use the vThunder login and password (Default user: admin, default password: <Unique ID of the Instance OCID>)**
 ```
-    vThunderADC-1(config)#import cloud-creds oci_api_key.pem use-mgmt-port https://www.dropbox.com/s/qwerty123456780/oci-config?
+    vThunderADC-1(config)#import cloud-creds oci_api_key.pem use-mgmt-port https://www.dropbox.com/s/qwertyxxxxxxx/oci-config?dl=0
     User name []?admin
     Password []?
     Done.
 ```
 1. Locate the cloud config file (filename: config) prepared in the API Keys Preparation section. On the vThunder CLI (config) mode, import the file as `config`.
 ```
-   vThunderADC-1(config)#import cloud-config config use-mgmt-port scp://192.168.0.254/root/oci/config
+   vThunderADC-1(config)#import cloud-config config use-mgmt-port scp://a.b.c.d/root/oci/config
    User name []?root
    Password []?
    Done.
    vThunderADC-1(config)#sh cloud-config config
    [DEFAULT]
    user=ocid1.user.oc1..aaaaaaa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7s8t9u0
-   fingerprint=1b:2c:3d:4e:5f:6g:7h:8i:9j:0k:1l:2m:3n:4o:5p:6q
+   fingerprint=1b:2c:3d:4e:5f:aa:7h:bb:9j:0k:1l:2m:3n:4o:5p:6q
    key_file=/a10data/cloud/oci_api_key.pem
-   pass_phrase=tenancy=ocid1.tenancy.oc1..aaaaaaaagz11111111bbbbbbbb2222222cccccccc3333333333
+   pass_phrase=tenancy=ocid1.tenancy.oc1..aaxxaaaagz11111111bbbbbbdd2222222cccddccc333d3333
    region=us-ashburn-1
 ```
->NOTE: Key_file name (e.g. oci_api_key.pem) in the config must match the user’s cloud-cred key file imported earlier.
+> NOTE: Key_file name (e.g. oci_api_key.pem) in the config must match the user’s cloud-cred key file imported earlier.
+## Copy SSH Key to Primary vThunderADC
+This is an optional step to synchronize VIP configuration of vThunder ADC-1 to standby vThunder ADC-2.
+    >NOTE: If the user prefers to configure VIPs on vThunder ADC-2 manually, please skip this step.
+
+    >NOTE: Configure sync command covers most of SLB configuration, security policies except routing and interface settings.
+
+    Before running `configure sync` command, the user will need to import the SSH private key on to vThunder ADC-1 as it’s required for SSH authentication.
+
+    Locate the SSH private key (**ssh_key_priv.pem**) prepared in the Deployment Prerequisites section. On the vThunder CLI (**config**) mode, import the SSH private key file “ssh_key_priv.pem”.
+```
+    vThunderADC-1(config)#import key sync_ssh_priv use-mgmt-port scp://192.168.0.254/root/oci/ssh_key_priv.pem
+    User name []?admin
+    Password []?
+    Done.
+    vThunderADC-1(config)#sh pki cert
+    Name: sync_ssh_priv Type: key [Unbound]
+```
+    >NOTE: If this operation failed with an error related to key file format, please try to convert the private key to OpenSSH format (Old or New) again, then import it again.
 
 ## HIGH AVAILABILITY (VRRP-A) CONFIGURATION
 In this section, you will configure the device redundancy feature, VRRP-A, on both vThunder ADCs. Here is the list of the CLI commands to form the VRRP-A and make vThunderADC-1 as an active device. You can copy and paste the following config, with appropriate modification if needed, to your vThunder ADCs.
 
 **vThunderADC-1 VRRP-A CONFIGURATION EXAMPLE**
 ```
-vThunderADC-1
 vrrp-a common
 device-id 1
 set-id 1
@@ -579,22 +606,24 @@ enable
 exit
 !
 vrrp-a vrid 0
+floating-ip 10.0.1.10
 floating-ip 10.0.2.10
 blade-parameters
 priority 220
 exit
 !
-vrrp-a interface ethernet 3
+vrrp-a interface ethernet 2
 !
 vrrp-a peer-group
 peer 10.0.2.12
 exit
 !
 vrrp-a session-sync enable
+exit
+wr mem
 ```
 **vThunderADC-2 VRRP-A CONFIGURATION EXAMPLE**
 ```
-vThunderADC-2
 vrrp-a common
 device-id 2
 set-id 1
@@ -602,16 +631,72 @@ enable
 exit
 !
 vrrp-a vrid 0
+floating-ip 10.0.1.10
 floating-ip 10.0.2.10
 blade-parameters
 priority 220
 exit
 !
-vrrp-a interface ethernet 3
+vrrp-a interface ethernet 2
 !
 vrrp-a peer-group
 peer 10.0.2.11
 exit
 !
 vrrp-a session-sync enable
+exit
+wr mem
 ```
+## Assign floating-ip addresses and Virtual IP's in OCI
+Once the failover configuration is completed The next step is to add the floating-ip addresses to the vnics in OCI.  In addition the Virtual IP address will also be configured on the Public VNIC.  This example will only reflect a single vip, but multiple can ben configured depending on the requirements.
+
+1. Login to OCI and go to the instances screen.
+1. Select the `vThunderADC-1` instances
+    > NOTE:  This portion of the configuration is only completed on the primary (`vThunderADC-1`) device
+1. Scroll down to the `Resources` section and select `Attached VNICS`
+1. Select `Public_VNIC` and under `Resources` select IP Addresses.
+1. First the floating IP address is configured by selecting `Assign Private IP address`
+1. On the `Private IP Address` screen fill out the following information:
+   * Private IP address:  10.0.1.10
+   * Public IP address:  No Public IP
+1. Finish the configuration by selecting `Assign`
+
+### Create Virtual IP
+Next step is to assign a virtual IP address.  For this the virtual IP address is 10.0.1.20.
+1. Login to OCI and go to the instances screen.
+1. Select the `vThunderADC-1` instances
+   > NOTE:  This portion of the configuration is only completed on the primary (`vThunderADC-1`) device
+1. Scroll down to the `Resources` section and select `Attached VNICS`
+1. Select `Public_VNIC` and under `Resources` select IP Addresses.
+1. First the floating IP address is configured by selecting `Assign Private IP address`
+1. On the `Private IP Address` screen fill out the following information:
+   * Private IP address:  10.0.1.20
+   * Public IP address:  Reserved Public IP
+   * Reserved Public IP:  Create a New Reserved Public IP
+   * Reserved Public IP Name: web
+
+     ![VIP IP](./images/vip-ip.png)
+1. Finish the configuration by selecting `Assign`
+1. Note the public IP address, this will be the external web site address.
+      ![VIP public IP](./images/vip-public-ip.png)
+
+### Configure Server Floating IP
+1. Select the `vThunderADC-1` instances
+    > NOTE:  This portion of the configuration is only completed on the primary (`vThunderADC-1`) device
+1. Scroll down to the `Resources` section and select `Attached VNICS`
+1. Select `Server_VNIC` and under `Resources` select IP Addresses.
+1. First the floating IP address is configured by selecting `Assign Private IP address`
+1. On the `Private IP Address` screen fill out the following information:
+   * Private IP address:  10.0.2.10
+   * Public IP address:  No Public IP
+     > NOTE:  For any of the back-end servers, this will be their default gateway.
+1. Finish the configuration by selecting `Assign`
+
+# CONFIGURE THE VIRTUAL SERVER (VIP) ON VTHUNDER ADC-1
+
+The user can configure virtual services, or VIP, using the CLI, GUI, AppCentric Templates (ACT) or Harmony Controller.
+In this document, for ease of configuration and operation, ACT is used, the A10 ACOS GUI plug-in module that enhances the user experience to deploy, monitor and troubleshoot applications in a frictionless manner. ACT contains wizard-based configuration tools  for many different applications and use-case configurations, including Basic LB, HTTPS/SSL Offload, MS Exchange, GSLB and more.
+
+## L4 VIP CREATION USING ACT
+This section explains how to configure a basic VIP (virtual server) for a port 80 web service using the ACT.
+>NOTE: ACT version used in the example is act-v2-1214-17-a10-0.tar.gz
