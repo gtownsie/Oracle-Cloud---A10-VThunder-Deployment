@@ -442,13 +442,13 @@ Server Network|10.0.2.12|10.0.2.10
     end
     ```
 1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are creaated and the instance is rebooted:
-```
+    ```
 vThunderADC-2(config)(NOLICENSE)#sh interfaces brief
 Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
 mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.4/24           1
 1       Disb  None  None   none  1    0200.1703.f7b9  0.0.0.0/0             0
 2       Disb  None  None   none  1    0200.1703.062e  0.0.0.0/0             0
-```
+    ```
 1. Set the IP address of the Public Network by creating the following VLANS by issuing the following commands *NOTE: VLAN tagging is disabled, the vlan tags themselves are not use.  Any tag number can be used.  In this example the vlan tag was pulled from the `Attached VNICs` menu*:
 ```
 vlan 2125
