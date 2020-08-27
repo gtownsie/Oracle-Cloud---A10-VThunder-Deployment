@@ -18,6 +18,7 @@
    - [Secondary vThunder - Configure Network Interface](#secondary-vthunder-configure-network-interface)   
 - [Redundancy Configuration](#redundancy-configuration)   
    - [IMPORT API PRIVATE KEY AND CLOUD CONFIG FILE TO VTHUNDER ADC](#import-api-private-key-and-cloud-config-file-to-vthunder-adc)   
+   - [HIGH AVAILABILITY (VRRP-A) CONFIGURATION](#high-availability-vrrp-a-configuration)   
 
 <!-- /MDTOC -->
 
