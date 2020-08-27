@@ -432,15 +432,15 @@ Server Network|10.0.2.12|10.0.2.10
 1. Add the DNS server by typing `ip dns primary 8.8.8.8`
 1. Add the hostname by typing `vThunderADC-2`
 1.  Validate the configuration by issuing a `sh run` command, it should mirror the following (some lines redacted):
-```
-vThunderADC-2(config)(NOLICENSE)#sh run
-!
-ip dns primary 8.8.8.8
-!
-hostname vThunderADC-2
-!
-end
-```
+    ```
+    vThunderADC-2(config)(NOLICENSE)#sh run
+    !
+    ip dns primary 8.8.8.8
+    !
+    hostname vThunderADC-2
+    !
+    end
+    ```
 1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are creaated and the instance is rebooted:
 ```
 vThunderADC-2(config)(NOLICENSE)#sh interfaces brief
