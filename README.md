@@ -1,3 +1,31 @@
+# Table of contents
+
+ <!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+
+- [Table of contents](#table-of-contents)   
+- [DEPLOYMENT SCENARIO](#deployment-scenario)   
+- [DEPLOYMENT PREREQUISITES](#deployment-prerequisites)   
+- [CONFIGURATION STEPS OVERVIEW](#configuration-steps-overview)   
+- [API KEYS AND CONFIG FILE PREPARATION](#api-keys-and-config-file-preparation)   
+   - [Set up an Oracle Cloud Infrastructure API Signing Key for Use with Oracle Functions](#set-up-an-oracle-cloud-infrastructure-api-signing-key-for-use-with-oracle-functions)   
+   - [Prepare SSH keys](#prepare-ssh-keys)   
+- [Configure Oracle Cloud](#configure-oracle-cloud)   
+   - [Create Virtual Cloud Network (VCN)](#create-virtual-cloud-network-vcn)   
+      - [Create VCN](#create-vcn)   
+      - [Modify Management and Server subnets](#modify-management-and-server-subnets)   
+   - [Create Public NETWORK](#create-public-network)   
+      - [Modify VCN Security Policy](#modify-vcn-security-policy)   
+- [Create a10 vThunder instances](#create-a10-vthunder-instances)   
+   - [Create Primary ADC instance](#create-primary-adc-instance)   
+      - [ATTACH VNICs to the ADC](#attach-vnics-to-the-adc)   
+   - [Create Secondary ADC instance](#create-secondary-adc-instance)   
+      - [ATTACH VNICs to the ADC](#attach-vnics-to-the-adc)   
+- [A10 vThunder CONFIGURATION](#a10-vthunder-configuration)   
+   - [Configuring the primary vThunder device](#configuring-the-primary-vthunder-device)   
+
+<!-- /MDTOC -->
+
+
 # DEPLOYMENT SCENARIO
 For this deployment example,a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure (OCI).
 
@@ -312,4 +340,156 @@ By default OCI will only deploy the instance with the Subnet defined in the Crea
 1. At the top of the instance Details screen, select `Reboot` to restart the instance.  Once the instance restarts the remaining network interfaces are available to ACOS.
 
 # A10 vThunder CONFIGURATION
-## Configuring the primary vThunder device
+## Primary vThunder - Configure Network Interface
+The next step is the congiruation of the data plane network interfaces, default gateway, DNS, and Hostname.
+
+>***NOTE:  The Hostname MUST match the Instance name***  
+
+Name|IP Address|Floating IP
+---------|---------|---------
+Hostname Name|vThunderADC-1|
+Management Network|DHCP|
+Public Network|10.0.1.11|10.0.1.10
+Server Network|10.0.2.11|10.0.2.10
+
+### Configure DNS and Hostname
+1. SSH into the public IP address of the vThunderADC-1 instances using the SSH keys created earlier in this document
+1. Type `enable` and `config t` to go into configuration mode.
+1. Add the DNS server by typing `ip dns primary 8.8.8.8`
+1. Add the hostname by typing `vThunderADC-1`
+1.  Validate the configuration by issuing a `sh run` command, it should mirror the following (some lines redacted):
+```
+vThunderADC-1(config)(NOLICENSE)#sh run
+!
+ip dns primary 8.8.8.8
+!
+hostname vThunderADC-1
+!
+end
+```
+1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are creaated and the instance is rebooted:
+```
+vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
+Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
+------------------------------------------------------------------------------------
+mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
+1       Disb  None  None   none  1    0200.1703.f7b9  0.0.0.0/0             0
+2       Disb  None  None   none  1    0200.1703.062e  0.0.0.0/0             0
+```
+1. Set the IP address of the Public Network by creating the following VLANS by issuing the following commands *NOTE: VLAN tagging is disabled, the vlan tags themselves are not use.  Any tag number can be used.  In this example the vlan tag was pulled from the `Attached VNICs` menu*:
+```
+vlan 2125
+untagged ethernet 1
+router-interface ve 2125
+name "Public Network"
+!
+interface ve 2125
+ip address 10.0.1.11 /24
+!
+vlan 2126
+untagged ethernet 2
+router-interface ve 2126
+name "Server Network"
+!
+interface ve 2126
+ip address 10.0.2.11 /24
+!
+```
+1.  Validate the configuration by running the 'sh interfaces brief' command again.  Below is an example of the output.
+```
+vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
+Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
+------------------------------------------------------------------------------------
+mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
+1       Disb  None  None   none  2125 0200.1703.f7b9  0.0.0.0/0             0
+2       Disb  None  None   none  2126 0200.1703.062e  0.0.0.0/0             0
+ve2125  Down  N/A   N/A    N/A   2125 0200.1703.f7b9  10.0.1.11/24          1
+ve2126  Down  N/A   N/A    N/A   2126 0200.1703.062e  10.0.2.11/24          1
+```
+1. Enable the ethernet interfaces by running the following commands:
+```
+interface ethernet 1
+enable
+interface ethernet 2
+enable
+```
+1.  Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
+1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
+
+
+**************************************************************************
+## Secondary vThunder - Configure Network Interface
+The next step is the configuration of the data plane network interfaces, default gateway, DNS, and Hostname.
+
+>***NOTE:  The Hostname MUST match the Instance name***  
+
+Name|IP Address|Floating IP
+---------|---------|---------
+Hostname Name|vThunderADC-2|
+Management Network|DHCP|
+Public Network|10.0.1.12|10.0.1.10
+Server Network|10.0.2.12|10.0.2.10
+
+### Configure DNS and Hostname
+1. SSH into the public IP address of the vThunderADC-1 instances using the SSH keys created earlier in this document
+1. Type `enable` and `config t` to go into configuration mode.
+1. Add the DNS server by typing `ip dns primary 8.8.8.8`
+1. Add the hostname by typing `vThunderADC-2`
+1.  Validate the configuration by issuing a `sh run` command, it should mirror the following (some lines redacted):
+```
+vThunderADC-2(config)(NOLICENSE)#sh run
+!
+ip dns primary 8.8.8.8
+!
+hostname vThunderADC-2
+!
+end
+```
+1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are creaated and the instance is rebooted:
+```
+vThunderADC-2(config)(NOLICENSE)#sh interfaces brief
+Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
+------------------------------------------------------------------------------------
+mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.4/24           1
+1       Disb  None  None   none  1    0200.1703.f7b9  0.0.0.0/0             0
+2       Disb  None  None   none  1    0200.1703.062e  0.0.0.0/0             0
+```
+1. Set the IP address of the Public Network by creating the following VLANS by issuing the following commands *NOTE: VLAN tagging is disabled, the vlan tags themselves are not use.  Any tag number can be used.  In this example the vlan tag was pulled from the `Attached VNICs` menu*:
+```
+vlan 2125
+untagged ethernet 1
+router-interface ve 2125
+name "Public Network"
+!
+interface ve 2125
+ip address 10.0.1.12 /24
+!
+vlan 2126
+untagged ethernet 2
+router-interface ve 2126
+name "Server Network"
+!
+interface ve 2126
+ip address 10.0.2.12 /24
+!
+```
+1.  Validate the configuration by running the 'sh interfaces brief' command again.  Below is an example of the output.
+```
+vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
+Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
+------------------------------------------------------------------------------------
+mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
+1       Disb  None  None   none  2125 0200.1703.f7b9  0.0.0.0/0             0
+2       Disb  None  None   none  2126 0200.1703.062e  0.0.0.0/0             0
+ve2125  Down  N/A   N/A    N/A   2125 0200.1703.f7b9  10.0.1.11/24          1
+ve2126  Down  N/A   N/A    N/A   2126 0200.1703.062e  10.0.2.11/24          1
+```
+1. Enable the ethernet interfaces by running the following commands:
+```
+interface ethernet 1
+enable
+interface ethernet 2
+enable
+```
+1.  Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
+1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
