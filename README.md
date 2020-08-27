@@ -371,7 +371,6 @@ end
 ```
 vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
 Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
-------------------------------------------------------------------------------------
 mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
 1       Disb  None  None   none  1    0200.1703.f7b9  0.0.0.0/0             0
 2       Disb  None  None   none  1    0200.1703.062e  0.0.0.0/0             0
@@ -399,7 +398,6 @@ ip address 10.0.2.11 /24
 ```
 vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
 Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
-------------------------------------------------------------------------------------
 mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
 1       Disb  None  None   none  2125 0200.1703.f7b9  0.0.0.0/0             0
 2       Disb  None  None   none  2126 0200.1703.062e  0.0.0.0/0             0
@@ -416,8 +414,6 @@ enable
 1.  Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
 1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
 
-
-**************************************************************************
 ## Secondary vThunder - Configure Network Interface
 The next step is the configuration of the data plane network interfaces, default gateway, DNS, and Hostname.
 
@@ -449,7 +445,6 @@ end
 ```
 vThunderADC-2(config)(NOLICENSE)#sh interfaces brief
 Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
-------------------------------------------------------------------------------------
 mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.4/24           1
 1       Disb  None  None   none  1    0200.1703.f7b9  0.0.0.0/0             0
 2       Disb  None  None   none  1    0200.1703.062e  0.0.0.0/0             0
@@ -477,7 +472,6 @@ ip address 10.0.2.12 /24
 ```
 vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
 Port    Link  Dupl  Speed  Trunk Vlan MAC             IP Address          IPs  Name
-------------------------------------------------------------------------------------
 mgmt    Up    auto  auto   N/A   N/A  0000.1700.9792  10.0.0.2/24           1
 1       Disb  None  None   none  2125 0200.1703.f7b9  0.0.0.0/0             0
 2       Disb  None  None   none  2126 0200.1703.062e  0.0.0.0/0             0
