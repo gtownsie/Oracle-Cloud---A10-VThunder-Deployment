@@ -1,7 +1,5 @@
-# Table of contents
-<!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+<!-- MDTOC maxdepth:2 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
 
-- [Table of contents](#table-of-contents)   
 - [DEPLOYMENT SCENARIO](#deployment-scenario)   
 - [DEPLOYMENT PREREQUISITES](#deployment-prerequisites)   
 - [CONFIGURATION STEPS OVERVIEW](#configuration-steps-overview)   
@@ -10,23 +8,21 @@
    - [Prepare SSH keys](#prepare-ssh-keys)   
 - [Configure Oracle Cloud](#configure-oracle-cloud)   
    - [Create Virtual Cloud Network (VCN)](#create-virtual-cloud-network-vcn)   
-      - [Create VCN](#create-vcn)   
-      - [Modify Management and Server subnets](#modify-management-and-server-subnets)   
    - [Create Public NETWORK](#create-public-network)   
-      - [Modify VCN Security Policy](#modify-vcn-security-policy)   
+   - [Oracle Cloud Infrastructure CLI configuration file (txt format)](#oracle-cloud-infrastructure-cli-configuration-file-txt-format)   
 - [Create a10 vThunder instances](#create-a10-vthunder-instances)   
    - [Create Primary ADC instance](#create-primary-adc-instance)   
-      - [ATTACH VNICs to the ADC](#attach-vnics-to-the-adc)   
    - [Create Secondary ADC instance](#create-secondary-adc-instance)   
-      - [ATTACH VNICs to the ADC](#attach-vnics-to-the-adc)   
 - [A10 vThunder CONFIGURATION](#a10-vthunder-configuration)   
    - [Primary vThunder - Configure Network Interface](#primary-vthunder-configure-network-interface)   
-      - [Configure DNS and Hostname](#configure-dns-and-hostname)   
    - [Secondary vThunder - Configure Network Interface](#secondary-vthunder-configure-network-interface)   
-      - [Configure DNS and Hostname](#configure-dns-and-hostname)   
-   - [configure redundancy](#configure-redundancy)   
+- [Redundancy Configuration](#redundancy-configuration)   
+   - [IMPORT API PRIVATE KEY AND CLOUD CONFIG FILE TO VTHUNDER ADC](#import-api-private-key-and-cloud-config-file-to-vthunder-adc)   
 
 <!-- /MDTOC -->
+
+
+
 
 # DEPLOYMENT SCENARIO
 For this deployment example,a web application service with a pair if vThunder VM's are deployed in one region using two available domains for redundancy in Oracle Cloud Infrastructure (OCI).
@@ -165,6 +161,8 @@ During the vThunder deployment an SSH Key pair is required to allow SSH access t
    ![PuTTY OpenSSH Notepad](./images/authorized_keys_notepad.png)
 1. Select the `Conversions` dropdown and select `export OpenSSH key` and save the file as `ssh_key` with no extension.
 
+
+
 # Configure Oracle Cloud
 ## Create Virtual Cloud Network (VCN)
 The next step is to create the VCN within Oracle Cloud.  Table 1 reflects the VCN network and the sub-networks contained within the VCN.  
@@ -239,8 +237,40 @@ To modify the security policy, follow the following steps:
 ![add ingress rule](./images/add_ingress_rule_1.png)
 1. `Save Changes`
 
+## Oracle Cloud Infrastructure CLI configuration file (txt format)
+When the vThunder devices are configured in a reduant pair, they must have the ability to communicate with OCI to move IP address beween the vThunderADC-1 and vThunderADC-2.  When assinging IP addresses to vnics, OCI only allows an IP address to be assigned to one instance and 1 vnic at a time.  When a failover occurs, the vThunder instances send a API call to OCI to remove the Virtal and floating IP address from the Primary to the secondary device.  The config file below provides the VThunder instances the credentials and information to communicate with OCI.  This configuration file will be used later in the implementation process.
+
+To build the `config` document the following information is needed:
+
+* User = User account OCID
+* Fingerprint = Public API key fingerprint that was uploaded in the previous step.
+* Key file = full path of private API key file on the vThunder
+* Pass phrase = add pass phrase if the private key is generated with a pass phrase (optional)
+* Tenancy = OCID of the tenancy in which the user will be creating and deploying functions.
+* Region = Region identifier of the Oracle Cloud Infrastructure in which the user is deploying services.
+
+Below is an example of a ‘config’ file below to be imported to the vThunder. See the section later in the document for the detailed procedures.
+```
+    [DEFAULT]
+    user=ocid1.user.oc1..aaaaaaa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7s8t9u0
+    fingerprint=1b:2c:3d:4e:5f:6g:7h:8i:9j:0k:1l:2m:3n:4o:5p:6q
+    key_file=/a10data/cloud/oci_api_key.pem
+    pass_phrase=
+    tenancy=ocid1.tenancy.oc1..aaaaaaaagz11111111bbbbbbbb2222222cccccccc3333333333
+    region=us-ashburn-1
+```
+1. To find the `User` account ocid, go to the profile page by clicking on the profile icon in the upper right corner of the OCI window.
+![OCID](./images/ocid.png)
+1. Use the `fingerprint` value that was collected in  the *Set up an Oracle Cloud Infrastructure API Signing Key for Use with Oracle Functions* section.
+1. The Key file, leave the same as in the example.
+1. To locate the tenancy value,  go to the tenancy page by clicking on the profile icon in the uppper right corner of the OCI window.
+![Tenancy OCID](./images/tenancy-ocid.png)
+1. To find the region name Click on the region dropdown at the top of the OCI page and choose Manage Regions.
+1. Find the region name that is used for your deployment and copy the `Region identifier`
+![Region](./images/region.png)
+
 # Create a10 vThunder instances
-TABLE 2: VTHUNDER ADC INSTANCE AND NETWORK CONFIGURATION SPECIFICATIONS
+Table 2: VTHUNDER ADC INSTANCE AND NETWORK CONFIGURATION SPECIFICATIONS
 
 -|PRIMARY ADC|SECONDARY ADC|NOTES
 ---------------|---------------------|--------------------|---------------
@@ -490,4 +520,97 @@ Server Network|10.0.2.12|10.0.2.10
 1.  Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
 1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
 
-## configure redundancy
+# Redundancy Configuration
+The next step in the process is to configure redundancy.  It is A10 recommended practice to have a dedicated interface and subnet for an `HA` network.  In some instances, when the vThunder is deployed with 2 interfaces, the first interface is used for management and the second is used for the server and public network in a 1-arm configuration.  Also, if a customer is running a 4 vnic instance and requires the 3 data plane interfaces for production traffic, then utilizing a data plane interface may be needed.  To demonstrate the A10 deployment flexibility, this example will not use an HA vlan/network the Server_Network is used.  
+> **If a vnic is available follow the steps above and add an additional network  and interface for `HA`**
+
+## IMPORT API PRIVATE KEY AND CLOUD CONFIG FILE TO VTHUNDER ADC
+A10 vThunder ADC has a tighter integration with Oracle Cloud Infrastructure using APIs, enabling an ADC high availability deployment. This section describes how to import an API key and cloud config file that are used for the automation of ADC failover workflow.
+1. Locate the API private key `(oci_api_key.pem)` prepared in the API Key Preparation section. On the vThunder CLI (config) mode, import the file as `oci_api_key.pem`. By default, this file is stored in the vThunder under the /a10data/cloud/ directory.
+```
+    vThunderADC-1# conf
+    vThunderADC-1(config)#import cloud-creds oci_api_key.pem use-mgmt-port scp://192.168.0.254/root/
+    oci/oci_api_key.pem
+    User name []?root
+    Password []?
+    Done.
+    vThunderADC-1(config)#show cloud-creds
+    --------------------------------------------------
+    Name Permissions
+    --------------------------------------------------
+    oci_api_key.pem 0400
+    --------------------------------------------------
+    ```
+> NOTE: The user can also download the file from a file share service such as Dropbox using the shared download link. Copy and paste the link into the command, as shown below. If the link is not set with a password, the user can use the vThunder login and password (Default user: admin, default password: <Unique ID of the Instance OCID>)
+
+    ```
+    vThunderADC-1(config)#import cloud-creds oci_api_key.pem use-mgmt-port https://www.dropbox.com/s/qwerty123456780/oci-config?
+    User name []?admin
+    Password []?
+    Done.
+    ```
+1. Locate the cloud config file (filename: config) prepared in the API Keys Preparation section. On the vThunder CLI (config) mode, import the file as `config`.
+   ```
+   vThunderADC-1(config)#import cloud-config config use-mgmt-port scp://192.168.0.254/root/oci/config
+   User name []?root
+   Password []?
+   Done.
+   vThunderADC-1(config)#sh cloud-config config
+   [DEFAULT]
+   user=ocid1.user.oc1..aaaaaaa1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7s8t9u0
+   fingerprint=1b:2c:3d:4e:5f:6g:7h:8i:9j:0k:1l:2m:3n:4o:5p:6q
+   key_file=/a10data/cloud/oci_api_key.pem
+   pass_phrase=tenancy=ocid1.tenancy.oc1..aaaaaaaagz11111111bbbbbbbb2222222cccccccc3333333333
+   region=us-ashburn-1
+   ```
+>NOTE: Key_file name (e.g. oci_api_key.pem) in the config must match the user’s cloud-cred key file imported earlier.
+
+## HIGH AVAILABILITY (VRRP-A) CONFIGURATION
+In this section, you will configure the device redundancy feature, VRRP-A, on both vThunder ADCs. Here is the list of the CLI commands to form the VRRP-A and make vThunderADC-1 as an active device. You can copy and paste the following config, with appropriate modification if needed, to your vThunder ADCs.
+
+**vThunderADC-1 VRRP-A CONFIGURATION EXAMPLE**
+```
+vThunderADC-1
+vrrp-a common
+device-id 1
+set-id 1
+enable
+exit
+!
+vrrp-a vrid 0
+floating-ip 10.0.2.10
+blade-parameters
+priority 220
+exit
+!
+vrrp-a interface ethernet 3
+!
+vrrp-a peer-group
+peer 10.0.2.12
+exit
+!
+vrrp-a session-sync enable
+```
+**vThunderADC-2 VRRP-A CONFIGURATION EXAMPLE**
+```
+vThunderADC-2
+vrrp-a common
+device-id 2
+set-id 1
+enable
+exit
+!
+vrrp-a vrid 0
+floating-ip 10.0.2.10
+blade-parameters
+priority 220
+exit
+!
+vrrp-a interface ethernet 3
+!
+vrrp-a peer-group
+peer 10.0.2.11
+exit
+!
+vrrp-a session-sync enable
+```
