@@ -540,17 +540,17 @@ A10 vThunder ADC has a tighter integration with Oracle Cloud Infrastructure usin
     --------------------------------------------------
     oci_api_key.pem 0400
     --------------------------------------------------
-    ```
+```
 > NOTE: The user can also download the file from a file share service such as Dropbox using the shared download link. Copy and paste the link into the command, as shown below. If the link is not set with a password, the user can use the vThunder login and password (Default user: admin, default password: <Unique ID of the Instance OCID>)
 
-    ```
+```
     vThunderADC-1(config)#import cloud-creds oci_api_key.pem use-mgmt-port https://www.dropbox.com/s/qwerty123456780/oci-config?
     User name []?admin
     Password []?
     Done.
-    ```
+```
 1. Locate the cloud config file (filename: config) prepared in the API Keys Preparation section. On the vThunder CLI (config) mode, import the file as `config`.
-   ```
+```
    vThunderADC-1(config)#import cloud-config config use-mgmt-port scp://192.168.0.254/root/oci/config
    User name []?root
    Password []?
@@ -562,7 +562,7 @@ A10 vThunder ADC has a tighter integration with Oracle Cloud Infrastructure usin
    key_file=/a10data/cloud/oci_api_key.pem
    pass_phrase=tenancy=ocid1.tenancy.oc1..aaaaaaaagz11111111bbbbbbbb2222222cccccccc3333333333
    region=us-ashburn-1
-   ```
+```
 >NOTE: Key_file name (e.g. oci_api_key.pem) in the config must match the user’s cloud-cred key file imported earlier.
 
 ## HIGH AVAILABILITY (VRRP-A) CONFIGURATION
