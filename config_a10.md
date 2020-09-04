@@ -4,7 +4,7 @@
 ---
 <!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
 
-- [A10 vThunder Configuration](#a10-vthunder-configuration)   
+- [[A10 vThunder Configuration](#configvthunder)](#a10-vthunder-configuration)   
    - [[Primary vThunder - Configuration](#configpri)](#primary-vthunder-configuration)   
       - [[DNS and Hostname Configuration](#configpridnshost)](#dns-and-hostname-configuration)   
       - [[Network Configuration](#configprinetwork)](#network-configuration)   
@@ -15,13 +15,13 @@
       - [[Import API Private Key and Cloud Config File](#redundancyconfig)](#import-api-private-key-and-cloud-config-file)   
       - [[Copy SSH Key to Primary vThunderADC](#redundancykey)](#copy-ssh-key-to-primary-vthunderadc)   
       - [[High Availability (VRRP-A) Configuration (HA)](#configha)](#high-availability-vrrp-a-configuration-ha)   
-      - [[Add Floating IP to Oracle Cloud](#configocifloat)](#add-floating-ip-to-oracle-cloud)   
+      - [Add Floating IP to Oracle Cloud](#add-floating-ip-to-oracle-cloud)   
 
 <!-- /MDTOC -->
 ---
-# A10 vThunder Configuration
+# [A10 vThunder Configuration](#configvthunder)
 ## [Primary vThunder - Configuration](#configpri)
-The next step is the congiruation of the data plane network interfaces, default gateway, DNS, and Hostname.
+The next step is the configuration of the data plane network interfaces, default gateway, DNS, and Hostname.
 
 >***NOTE:  The Hostname MUST match the Instance name***
 
@@ -314,7 +314,7 @@ exit
 wr mem
 ```
 
-### [Add Floating IP to Oracle Cloud](#configocifloat)
+### Add Floating IP to Oracle Cloud
 1. Login to OCI and go the instances screen
 1. Select the `vThunderADC-1` instances
     > NOTE:  This portion of the configuration is only completed on the primary (`vThunderADC-1`) instance
