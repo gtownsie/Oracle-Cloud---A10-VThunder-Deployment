@@ -4,7 +4,7 @@
 ---
 <!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
 
-- [[A10 vThunder Configuration](#configvthunder)](#a10-vthunder-configuration)   
+- [A10 vThunder Configuration](#a10-vthunder-configuration)   
    - [[Primary vThunder - Configuration](#configpri)](#primary-vthunder-configuration)   
       - [[DNS and Hostname Configuration](#configpridnshost)](#dns-and-hostname-configuration)   
       - [[Network Configuration](#configprinetwork)](#network-configuration)   
@@ -19,7 +19,7 @@
 
 <!-- /MDTOC -->
 ---
-# [A10 vThunder Configuration](#configvthunder)
+# A10 vThunder Configuration
 ## [Primary vThunder - Configuration](#configpri)
 The next step is the congiruation of the data plane network interfaces, default gateway, DNS, and Hostname.
 
