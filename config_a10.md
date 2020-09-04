@@ -6,7 +6,7 @@
    - [Primary vThunder - Configuration](#configpri)
       - [DNS and Hostname Configuration](#configpridnshost)
       - [Network Configuration](#configprinetwork)
-   - [Secondary vThunder - Configuration](#configsec) 
+   - [Secondary vThunder - Configuration](#configsec)
       - [Configure DNS and Hostname](#configsecdnshost)
       - [Network Configuration](#configsecnetwork)
    - [Redundancy Configuration](#redundancy)
@@ -19,13 +19,11 @@
 ## [Primary vThunder - Configuration](#configpri)
 The next step is the configuration of the data plane network interfaces, default gateway, DNS, and Hostname.
 
->***NOTE:  The Hostname MUST match the Instance name***
-
 Name|IP Address|Floating IP
 ---------|---------|---------
 Hostname Name|vThunderADC-1|
 Management Network|DHCP|
-Public Network|10.0.1.11|10.0.1.10
+Public Network|10.0.1.11|
 Server Network|10.0.2.11|10.0.2.10
 
 ### [DNS and Hostname Configuration](#configpridnshost)
@@ -310,7 +308,7 @@ exit
 wr mem
 ```
 
-### [Add Floating IP to Oracle Cloud](#configocifloat)
+### Add Floating IP to Oracle Cloud
 1. Login to OCI and go the instances screen
 1. Select the `vThunderADC-1` instances
     > NOTE:  This portion of the configuration is only completed on the primary (`vThunderADC-1`) instance
