@@ -2,22 +2,18 @@
 - [Previous - Deploy A10 Instances](./deploy_a10.md)
 - [Next - Create Virtual Server](./virtual_a10.md)
 ---
-<!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
-
-- [[A10 vThunder Configuration](#configvthunder)](#a10-vthunder-configuration)   
-   - [[Primary vThunder - Configuration](#configpri)](#primary-vthunder-configuration)   
-      - [[DNS and Hostname Configuration](#configpridnshost)](#dns-and-hostname-configuration)   
-      - [[Network Configuration](#configprinetwork)](#network-configuration)   
-   - [[Secondary vThunder - Configuration](#configsec)](#secondary-vthunder-configuration)   
-      - [[Configure DNS and Hostname](#configsecdnshost)](#configure-dns-and-hostname)   
-      - [[Network Configuration](#configsecnetwork)](#network-configuration)   
-   - [[Redundancy Configuration](#redundancy)](#redundancy-configuration)   
-      - [[Import API Private Key and Cloud Config File](#redundancyconfig)](#import-api-private-key-and-cloud-config-file)   
-      - [[Copy SSH Key to Primary vThunderADC](#redundancykey)](#copy-ssh-key-to-primary-vthunderadc)   
-      - [[High Availability (VRRP-A) Configuration (HA)](#configha)](#high-availability-vrrp-a-configuration-ha)   
-      - [Add Floating IP to Oracle Cloud](#add-floating-ip-to-oracle-cloud)   
-
-<!-- /MDTOC -->
+- [A10 vThunder Configuration](#configvthunder)
+   - [Primary vThunder - Configuration](#configpri)
+      - [DNS and Hostname Configuration](#configpridnshost)
+      - [Network Configuration](#configprinetwork)
+   - [Secondary vThunder - Configuration](#configsec) 
+      - [Configure DNS and Hostname](#configsecdnshost)
+      - [Network Configuration](#configsecnetwork)
+   - [Redundancy Configuration](#redundancy)
+      - [Import API Private Key and Cloud Config File](#redundancyconfig)]
+      - [Copy SSH Key to Primary vThunderADC](#redundancykey)
+      - [High Availability (VRRP-A) Configuration (HA)](#configha)
+      - [Add Floating IP to Oracle Cloud](#configocifloat)
 ---
 # [A10 vThunder Configuration](#configvthunder)
 ## [Primary vThunder - Configuration](#configpri)
@@ -314,7 +310,7 @@ exit
 wr mem
 ```
 
-### Add Floating IP to Oracle Cloud
+### [Add Floating IP to Oracle Cloud](#configocifloat)
 1. Login to OCI and go the instances screen
 1. Select the `vThunderADC-1` instances
     > NOTE:  This portion of the configuration is only completed on the primary (`vThunderADC-1`) instance
