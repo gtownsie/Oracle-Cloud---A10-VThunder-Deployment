@@ -3,7 +3,7 @@
 - [Next - Deploy A10 Instances](./deploy_a10.md)
 ---
 # Configure Oracle Cloud
-## Create Virtual Cloud Network (VCN)
+## [Create Virtual Cloud Network (VCN)](#create_vcn)
 The next step is to create the VCN within Oracle Cloud.  Table 1 reflects the VCN network and the sub-networks contained within the VCN.  
 
 **Table 1:  Example VCN and Subnet Assignement**
