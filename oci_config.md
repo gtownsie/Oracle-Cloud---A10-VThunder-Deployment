@@ -2,7 +2,20 @@
 - [Previous - SSH Key](./ssh_keys.md)
 - [Next - Deploy A10 Instances](./deploy_a10.md)
 ---
-# Configure Oracle Cloud
+<!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+
+- [[Configure Oracle Cloud](#configoci)](#configure-oracle-cloud)   
+   - [[Create Virtual Cloud Network (VCN)](#create_vcn)](#create-virtual-cloud-network-vcn)   
+      - [[Create VCN](#createvcn)](#create-vcn)   
+      - [[Modify Management and Server subnets](#modifymgmtsvrnet)](#modify-management-and-server-subnets)   
+   - [[Create Public NETWORK](#createpublicnet)](#create-public-network)   
+      - [[Modify VCN Security Policy](#modifysecpol)](#modify-vcn-security-policy)   
+   - [[Oracle Cloud Infrastructure CLI A10 configuration file](#ociconfigfile)](#oracle-cloud-infrastructure-cli-a10-configuration-file)   
+   - [[Add A10 Floating IP to OCI](#ocifloating)](#add-a10-floating-ip-to-oci)   
+
+<!-- /MDTOC -->
+---
+# [Configure Oracle Cloud](#configoci)
 ## [Create Virtual Cloud Network (VCN)](#create_vcn)
 The next step is to create the VCN within Oracle Cloud.  Table 1 reflects the VCN network and the sub-networks contained within the VCN.  
 
@@ -18,7 +31,7 @@ Subnet|Management|10.0.0.0/24|Public/Regional
  -|Server|10.0.2.0/24|Private/Regional
  -|HA|10.0.10.0/24|Private/Regional
 
-### Create VCN
+### [Create VCN](#createvcn)
 1. Login to the Oracle Cloud web interfaces
 1. Select the "hamburger" menu dropdown in the upper left corner, Select `Networking/Virtual Cloud Networks`
 1. Click on the `Start VCN Wizard` and
@@ -32,7 +45,7 @@ Subnet|Management|10.0.0.0/24|Public/Regional
 1. Select `Next`
 1. Select `Create`
 
-### Modify Management and Server subnets
+### [Modify Management and Server subnets](#modifymgmtsvrnet)
 1. Go into the `VCN_a10dmo` configuration page
 1. Select `Public Subnet-VCN_a10demo`
 1. Select `Edit`
@@ -51,7 +64,7 @@ Subnet|Management|10.0.0.0/24|Public/Regional
     </BR>![add ingress rule](./images/add_ingress_rule_1.png)
 1. `Save Changes`
 
-## Create Public NETWORK
+## [Create Public NETWORK](#createpublicnet)
 1. Create Route Table by going into Route tables under resources and choosing `Create Route Table`
  </BR>![Create VCN](./images/public_network_route_table.png)
 1. Go the the 'Subnets' screen and select `Create Subnet`
@@ -68,7 +81,7 @@ Subnet|Management|10.0.0.0/24|Public/Regional
 Once completed the Subnets for the VCN will reflect the following:
 </BR>![VCN Configuration ](./images/vcn_configuration.png)
 
-### Modify VCN Security Policy
+### [Modify VCN Security Policy](#modifysecpol)
 By default the VCN security policy only allows SSH, ICMP Type 3 code 4, and ICMP type 3 from the VCN main Net block (10.0.0.0/20).  *This policy also applies to device to device connectivity within the VCN subnets*.  For this lab the security policy is set to ANY/ANY all protocols.  
 
 > ***THIS IS NOT RECOMMENDED FOR A PRODUCTION ENVIRONMENT  ONCE THE CONFIGURATION IS COMPLETE PLEASE FOLLOW YOUR COMPANY STANDARDS FOR SECURITY POLICIES***
@@ -84,7 +97,7 @@ To modify the security policy, follow the following steps:
 </BR>![add ingress rule](./images/add_ingress_rule_1.png)
 1. `Save Changes`
 
-## Oracle Cloud Infrastructure CLI configuration file (txt format)
+## [Oracle Cloud Infrastructure CLI A10 configuration file](#ociconfigfile)
 When the vThunder devices are configured in a reduant pair, they must have the ability to communicate with OCI to move IP address beween the vThunderADC-1 and vThunderADC-2.  When assinging IP addresses to vnics, OCI only allows an IP address to be assigned to one instance and 1 vnic at a time.  When a failover occurs, the vThunder instances send a API call to OCI to remove the Virtal and floating IP address from the Primary to the secondary device.  The config file below provides the VThunder instances the credentials and information to communicate with OCI.  This configuration file will be used later in the implementation process.
 
 To build the `config` document the following information is needed:
@@ -115,6 +128,20 @@ Below is an example of a ‘config’ file below to be imported to the vThunder.
 1. To find the region name Click on the region dropdown at the top of the OCI page and choose Manage Regions.
 1. Find the region name that is used for your deployment and copy the `Region identifier`
 </BR>![Region](./images/region.png)
+
+## [Add A10 Floating IP to OCI](#ocifloating)
+1. Login to OCI and go the instances screen
+1. Select the `vThunderADC-1` instances
+    > NOTE:  This portion of the configuration is only completed on the primary (`vThunderADC-1`) instance
+
+1. Scroll down to the `Resources` section and select `Attached VNICS`
+1. Select `Server_VNIC` and under `Resources` select IP Addresses.
+1. First the floating IP address is configured by selecting `Assign Private IP address`
+1. On the `Private IP Address` screen fill out the following information:
+   * Private IP address:  10.0.2.10
+   * Public IP address:  No Public IP
+     > NOTE:  For any of the back-end servers, this will be their default gateway.
+1. Finish the configuration by selecting `Assign`
 
 ---
 - [Main Menu](./README.md)
