@@ -17,7 +17,7 @@ To deploy vThunder ADC for a business application running in OCI, the user needs
 The high-level configuration steps of this example deployment are as follows:
 1. [Prepare Oracle API Public and Private Keys and A10 Keys for login and HA](./ssh_keys.md)
 1. [Oracle Cloud configuration (OCI)](./oci_config.md)
-   1. Create Virtual Cloud Network (VCN)
+   1. [Create Virtual Cloud Network (VCN)](./oci_config.md#creaatevcn)
    1. Configure Management and Server subnets
    1. Create Public network
    1. Modify VCN Security Policy
