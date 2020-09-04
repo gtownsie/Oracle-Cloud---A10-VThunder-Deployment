@@ -2,20 +2,8 @@
 - [Previous - SSH Key](./ssh_keys.md)
 - [Next - Deploy A10 Instances](./deploy_a10.md)
 ---
-<!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
 
-- [[Configure Oracle Cloud](#configoci)](#configure-oracle-cloud)   
-   - [[Create Virtual Cloud Network (VCN)](#create_vcn)](#create-virtual-cloud-network-vcn)   
-      - [[Create VCN](#createvcn)](#create-vcn)   
-      - [[Modify Management and Server subnets](#modifymgmtsvrnet)](#modify-management-and-server-subnets)   
-   - [[Create Public NETWORK](#createpublicnet)](#create-public-network)   
-      - [[Modify VCN Security Policy](#modifysecpol)](#modify-vcn-security-policy)   
-   - [[Oracle Cloud Infrastructure CLI A10 configuration file](#ociconfigfile)](#oracle-cloud-infrastructure-cli-a10-configuration-file)   
-   - [[Add A10 Floating IP to OCI](#ocifloating)](#add-a10-floating-ip-to-oci)   
-
-<!-- /MDTOC -->
----
-# [Configure Oracle Cloud](#configoci)
+# [Configure Oracle Cloud]
 ## [Create Virtual Cloud Network (VCN)](#create_vcn)
 The next step is to create the VCN within Oracle Cloud.  Table 1 reflects the VCN network and the sub-networks contained within the VCN.  
 
