@@ -7,12 +7,12 @@
 - [Primary vThunder - Configuration](#primary-vthunder-configuration)   
    - [DNS and Hostname Configuration](#dns-and-hostname-configuration)   
    - [Network Configuration](#network-configuration)   
-- [Secondary vThunder - Configuration](#secondary-vthunder-configuration)   
+- [Secondary vThunder Configuration](#secondary-vthunder-configuration)   
    - [Configure DNS and Hostname](#configure-dns-and-hostname)   
    - [Network Configuration](#network-configuration)   
 - [Redundancy Configuration](#redundancy-configuration)   
    - [Import API Private Key and Cloud Config File](#import-api-private-key-and-cloud-config-file)   
-   - [Copy SSH Key to Primary vThunderADC](#copy-ssh-key-to-primary-vthunderadc)   
+   - [Copy SSH Key to Primary vThunder ADC](#copy-ssh-key-to-primary-vthunder-adc)   
    - [High Availability Configuration](#high-availability-configuration)   
    - [Add Floating IP to Oracle Cloud](#add-floating-ip-to-oracle-cloud)   
 
@@ -105,7 +105,7 @@ Server Network|10.0.2.11|10.0.2.10
 1. Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
 1. Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
 
-## Secondary vThunder - Configuration
+## Secondary vThunder Configuration
 The next step is the configuration of the data plane network interfaces, default gateway, DNS, and Hostname.
 
 >***NOTE:  The Hostname MUST match the Instance name***
@@ -238,7 +238,7 @@ A10 vThunder ADC has a tighter integration with Oracle Cloud Infrastructure usin
 ```
 > NOTE: Key_file name (e.g. oci_api_key.pem) in the config must match the user’s cloud-cred key file imported earlier.
 
-### Copy SSH Key to Primary vThunderADC
+### Copy SSH Key to Primary vThunder ADC
 This is an optional step to synchronize VIP configuration of vThunder ADC-1 to standby vThunder ADC-2.
     >NOTE: If the user prefers to configure VIPs on vThunder ADC-2 manually, please skip this step.
 

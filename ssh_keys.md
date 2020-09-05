@@ -3,13 +3,13 @@
 ---
 <!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
 
-- [[API and SSH Key Preparation](#sshkey)](#api-and-ssh-key-preparation)   
-   - [[Set up an Oracle Cloud Infrastructure API Signing Key](#ociapikey)](#set-up-an-oracle-cloud-infrastructure-api-signing-key)   
-   - [[Prepare vThunder SSH keys](#a10sshkey)](#prepare-vthunder-ssh-keys)   
+- [API and SSH Key Preparation](#api-and-ssh-key-preparation)   
+   - [Set up an Oracle Cloud Infrastructure API Signing Key](#set-up-an-oracle-cloud-infrastructure-api-signing-key)   
+   - [Prepare vThunder SSH keys](#prepare-vthunder-ssh-keys)   
 
 <!-- /MDTOC -->
 ---
-# [API and SSH Key Preparation](#sshkey)
+# API and SSH Key Preparation
 
 API keys are required to perform the VRRP-A failover process in an Oracle Cloud Infrastructure deployment. vThunder supports unicast-based VRRP-A to provide redundancy when an active vThunder goes down for any reason. In the Oracle Cloud environment, a public IP address is assigned for a VIP as a secondary IP on the uplink / gateway facing interface. The secondary public IP address(es) have to be moved from the failed vThunder to a new active vThunder when the failover is triggered. The A10 vThunder in the Oracle Cloud implements this workflow and can automatically move the VIP address(es) and other floating IP addresses to the new active vThunder using API-based Oracle functions.
 The following files need to be prepared before starting the vThunder configuration.
@@ -18,7 +18,7 @@ The following files need to be prepared before starting the vThunder configurati
   * Private key: oci_api_key.pem (RSA 2K key, PEM format)
   * Public key: oci_api_key_pub.pem
 
-## [Set up an Oracle Cloud Infrastructure API Signing Key](#ociapikey)
+## Set up an Oracle Cloud Infrastructure API Signing Key
 Before using Oracle Functions, you have to set up an Oracle Cloud Infrastructure API signing key for use with Oracle functions.  This will allow the A10 instances to move floating and virtual IP addresses between the A10 active/standby instances.
 
 The instructions in this topic assume:
@@ -102,7 +102,7 @@ The key is uploaded and its fingerprint is displayed (for example, `d1:b2:32:53:
 
 > **Note the fingerprint value. You'll use the fingerprint in a subsequent configuration task.**
 
-## [Prepare vThunder SSH keys](#a10sshkey)
+## Prepare vThunder SSH keys
 During the vThunder deployment an SSH Key pair is required to allow SSH access to the instances after deployment.  The following steps will outline the process to generate the key pair using the `puttygen` utility.
 1. Install putty on your workstation from the putty site:  https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
 1. After the installation is complete run the `puttygen` utility
