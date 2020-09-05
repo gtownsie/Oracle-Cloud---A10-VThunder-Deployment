@@ -4,16 +4,16 @@
 ---
 <!-- MDTOC maxdepth:6 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
 
-- [[Create a10 vThunder instances](#creaatea10instance)](#create-a10-vthunder-instances)   
-   - [[Create Primary ADC instance](#priadc)](#create-primary-adc-instance)   
-      - [[ATTACH VNICs to the ADC](#attachprivnic)](#attach-vnics-to-the-adc)   
-   - [[Create Secondary ADC instance](#secadc)](#create-secondary-adc-instance)   
-      - [[ATTACH VNICs to the ADC](#attachsecvnic)](#attach-vnics-to-the-adc)   
+- [Create a10 vThunder instances](#create-a10-vthunder-instances)   
+   - [Create Primary ADC instance](#create-primary-adc-instance)   
+      - [ATTACH VNICs to the ADC](#attach-vnics-to-the-adc)   
+   - [Create Secondary ADC instance](#create-secondary-adc-instance)   
+      - [ATTACH VNICs to the ADC](#attach-vnics-to-the-adc)   
 
 <!-- /MDTOC -->
 
 ---
-# [Create a10 vThunder instances](#creaatea10instance)
+# Create a10 vThunder instances
 Table 2: VTHUNDER ADC INSTANCE AND NETWORK CONFIGURATION SPECIFICATIONS
 
 -|PRIMARY ADC|SECONDARY ADC|NOTES
@@ -28,7 +28,7 @@ Subnet Compartment|a10demo|a10demo|
 Subnet|Management_Network|Management_Network|For mgmt. interface
 Public IP assignment|Yes|Yes
 
-## [Create Primary ADC instance](#priadc)
+## Create Primary ADC instance
 Next a the Secondary ADC instance is created using the following settings.
 
 Name|IP Address|Floating IP
@@ -56,7 +56,7 @@ Server Network|10.0.2.11|10.0.2.10
 ![Configure Networking](./images/cci-ssh.png)
 1.  Choose `Create` to create the instance.
 
-### [ATTACH VNICs to the ADC](#attachprivnic)
+### ATTACH VNICs to the ADC
 By default OCI will only deploy the instance with the Subnet defined in the Create Compute Instance Network Configuration.  The following steps will add the Public and Server networks to the Instance.
 
 1. Select `vThunderADC-1` under the instances List
@@ -72,7 +72,7 @@ By default OCI will only deploy the instance with the Subnet defined in the Crea
 ![Create Server VNICs](./images/vnic-server-1.png)
 1. At the top of the instance Details screen, select `Reboot` to restart the instance.  Once the instance restarts the remaining network interfaces are available to ACOS.
 
-## [Create Secondary ADC instance](#secadc)
+## Create Secondary ADC instance
 Next a the Secondary ADC instance is created using the following settings.
 
 Name|IP Address|Floating IP
@@ -100,7 +100,7 @@ Server Network|10.0.2.12|10.0.2.10
 ![Configure Networking](./images/cci-ssh.png)
 1.  Choose `Create` to create the instance.
 
-### [ATTACH VNICs to the ADC](#attachsecvnic)
+### ATTACH VNICs to the ADC
 By default OCI will only deploy the instance with the Subnet defined in the Create Compute Instance Network Configuration.  The following steps will add the Public and Server networks to the Instance.
 
 1. Select `vThunderADC-2` under the instances List

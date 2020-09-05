@@ -2,21 +2,24 @@
 - [Previous - Deploy A10 Instances](./deploy_a10.md)
 - [Next - Create Virtual Server](./virtual_a10.md)
 ---
-- [A10 vThunder Configuration](#configvthunder)
-   - [Primary vThunder - Configuration](#configpri)
-      - [DNS and Hostname Configuration](#configpridnshost)
-      - [Network Configuration](#configprinetwork)
-   - [Secondary vThunder - Configuration](#configsec)
-      - [Configure DNS and Hostname](#configsecdnshost)
-      - [Network Configuration](#configsecnetwork)
-   - [Redundancy Configuration](#redundancy)
-      - [Import API Private Key and Cloud Config File](#redundancyconfig)]
-      - [Copy SSH Key to Primary vThunderADC](#redundancykey)
-      - [High Availability (VRRP-A) Configuration (HA)](#configha)
-      - [Add Floating IP to Oracle Cloud](#configocifloat)
+<!-- MDTOC maxdepth:3 firsth1:0 numbering:0 flatten:0 bullets:1 updateOnSave:1 -->
+
+- [Primary vThunder - Configuration](#primary-vthunder-configuration)   
+   - [DNS and Hostname Configuration](#dns-and-hostname-configuration)   
+   - [Network Configuration](#network-configuration)   
+- [Secondary vThunder Configuration](#secondary-vthunder-configuration)   
+   - [Configure DNS and Hostname](#configure-dns-and-hostname)   
+   - [Network Configuration](#network-configuration)   
+- [Redundancy Configuration](#redundancy-configuration)   
+   - [Import API Private Key and Cloud Config File](#import-api-private-key-and-cloud-config-file)   
+   - [Copy SSH Key to Primary vThunder ADC](#copy-ssh-key-to-primary-vthunder-adc)   
+   - [High Availability Configuration](#high-availability-configuration)   
+   - [Add Floating IP to Oracle Cloud](#add-floating-ip-to-oracle-cloud)   
+
+<!-- /MDTOC -->
 ---
-# [A10 vThunder Configuration](#configvthunder)
-## [Primary vThunder - Configuration](#configpri)
+# A10 vThunder Configuration
+## Primary vThunder - Configuration
 The next step is the configuration of the data plane network interfaces, default gateway, DNS, and Hostname.
 
 Name|IP Address|Floating IP
@@ -26,7 +29,7 @@ Management Network|DHCP|
 Public Network|10.0.1.11|
 Server Network|10.0.2.11|10.0.2.10
 
-### [DNS and Hostname Configuration](#configpridnshost)
+### DNS and Hostname Configuration
 1. SSH into the public IP address of the vThunderADC-1 instances using the SSH keys created earlier in this document
 1. Type `enable` and `config t` to go into configuration mode.
 1. Add the DNS server by typing `ip dns primary 8.8.8.8`
@@ -41,7 +44,7 @@ Server Network|10.0.2.11|10.0.2.10
     !
     ```
 
-### [Network Configuration](#configprinetwork)
+### Network Configuration
 1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are creaated and the instance is rebooted:
     ```
     vThunderADC-1(config)(NOLICENSE)#sh interfaces brief
@@ -102,7 +105,7 @@ Server Network|10.0.2.11|10.0.2.10
 1. Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
 1. Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
 
-## [Secondary vThunder - Configuration](#configsec)
+## Secondary vThunder Configuration
 The next step is the configuration of the data plane network interfaces, default gateway, DNS, and Hostname.
 
 >***NOTE:  The Hostname MUST match the Instance name***
@@ -114,7 +117,7 @@ Management Network|DHCP|
 Public Network|10.0.1.12|10.0.1.10
 Server Network|10.0.2.12|10.0.2.10
 
-### [Configure DNS and Hostname](#configsecdnshost)
+### Configure DNS and Hostname
 1. SSH into the public IP address of the vThunderADC-1 instances using the SSH keys created earlier in this document
 1. Type `enable` and `config t` to go into configuration mode.
 1. Add the DNS server by typing `ip dns primary 8.8.8.8`
@@ -130,7 +133,7 @@ Server Network|10.0.2.12|10.0.2.10
     end
     wr mem
     ```
-### [Network Configuration](#configsecnetwork)
+### Network Configuration
 1. Validate that the vThunder recognizes the network interfaces by running the `sh interfaces brief`, below is a sample of the output, if only the management interface is shown issue a reboot command, the interfaces are recognized after the vnics are created and the instance is rebooted:
     ```
     vThunderADC-2(config)(NOLICENSE)#sh interfaces brief
@@ -192,11 +195,11 @@ wr mem
 1. Run the 'sh interfaces brief' command again and the interfaces should reflect the `UP` status
 1.  Create a default gateway `ip route 0.0.0.0 /0 10.0.1.1`
 
-## [Redundancy Configuration](#redundancy)
+## Redundancy Configuration
 The next step in the process is to configure redundancy.  It is A10 recommended practice to have a dedicated interface and subnet for an `HA` network.  In some instances, when the vThunder is deployed with 2 interfaces, the first interface is used for management and the second is used for the server and public network in a 1-arm configuration.  Also, if a customer is running a 4 vnic instance and requires the 3 data plane interfaces for production traffic, then utilizing a data plane interface may be needed.  To demonstrate the A10 deployment flexibility, this example will not use an HA vlan/network the Server_Network is used.
 > **If a vnic is available follow the steps above and add an additional network  and interface for `HA`**
 
-### [Import API Private Key and Cloud Config File](#redundancyconfig)
+### Import API Private Key and Cloud Config File
 A10 vThunder ADC has a tighter integration with Oracle Cloud Infrastructure using APIs, enabling an ADC high availability deployment. This section describes how to import an API key and cloud config file that are used for the automation of ADC failover workflow.
 1. Locate the API private key `(oci_api_key.pem)` prepared in the API Key Preparation section. On the vThunder CLI (config) mode, import the file as `oci_api_key.pem`. By default, this file is stored in the vThunder under the /a10data/cloud/ directory.
 ```
@@ -235,7 +238,7 @@ A10 vThunder ADC has a tighter integration with Oracle Cloud Infrastructure usin
 ```
 > NOTE: Key_file name (e.g. oci_api_key.pem) in the config must match the user’s cloud-cred key file imported earlier.
 
-### [Copy SSH Key to Primary vThunderADC](#redundancykey)
+### Copy SSH Key to Primary vThunder ADC
 This is an optional step to synchronize VIP configuration of vThunder ADC-1 to standby vThunder ADC-2.
     >NOTE: If the user prefers to configure VIPs on vThunder ADC-2 manually, please skip this step.
 
@@ -254,7 +257,7 @@ This is an optional step to synchronize VIP configuration of vThunder ADC-1 to s
 ```
     >NOTE: If this operation failed with an error related to key file format, please try to convert the private key to OpenSSH format (Old or New) again, then import it again.
 
-### [High Availability (VRRP-A) Configuration (HA)](#configha)
+### High Availability Configuration
 In this section, you will configure the device redundancy feature, VRRP-A, on both vThunder ADCs. Here is the list of the CLI commands to form the VRRP-A and make vThunderADC-1 as an active device. You can copy and paste the following config, with appropriate modification if needed, to your vThunder ADCs.
 
 **vThunderADC-1 VRRP-A CONFIGURATION EXAMPLE**
